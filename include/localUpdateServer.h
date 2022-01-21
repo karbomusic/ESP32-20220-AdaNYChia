@@ -61,7 +61,6 @@ void startUpdateServer()
                 httpServer.sendHeader("Connection", "close");
                 httpServer.send(200, "text/html", "Option not allowed.");
             }
-            digitalWrite(LED_BUILTIN, LOW);
             bangLED(LOW);
         },
         []()

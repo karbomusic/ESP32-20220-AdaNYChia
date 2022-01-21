@@ -16,23 +16,12 @@
              may be ported over from my legacy projects.
 
              Architecture: ESP32 specific.
-
-  Dependencies:
-
-             <localWifi.h> 
-                -- <WiFi.h>
-                -- <WiFiClient.h>
-                -- <ESPmDNS.h>  
-                -- <secrets.h>            
-             <localUPdateServer.h>
-                -- <WebServer.h>
-                -- <Update.h>
-                -- <strings.h>
             
   Config:    You must update secrets.h with your WiFi credentials
              and the hostname you choose for this device.
              SPIFFs for HTML requires update.html to be uploaded first.
              https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/
+             or use the PIO tasks to upload to SPIFFs.
 
   Building:  pio run -t <target> -e envName
 
@@ -52,17 +41,25 @@
 #include "SPIFFS.h"
 #include <localWiFi.h>
 #include <localUpdateServer.h>
+#include <zUtils.h>
 
-#if defined(heltec_wifi_kit_32)  // OLED display
+// OLED display
+#if defined(chia_led)
 #include <oled.h>
+extern Adafruit_SSD1306 display;
 #endif
 
+// externs
 extern WebServer httpServer;
 extern void startWifi();
 extern void startUpdateServer();
 extern bool isWiFiConnected();
-extern int g_lineHeight;
+extern String globalIP;
 
+// prototypes
+String checkSPIFFS();
+
+// locals
 const int activityLED = 12;
 unsigned long lastUpdate = 0;
 
@@ -73,35 +70,28 @@ void setup()
     ---------------------------------------------------------------------*/
     Serial.begin(115200);
     Serial.println();
-    Serial.println("Booting up...");
+    Serial.println("Booting...");
+    zUtils::getChipInfo();
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
 
-    // SPIFFs support
-    if (!SPIFFS.begin(true))
-    {
-        Serial.println("An Error has occurred while mounting SPIFFS");
-        return;
-    }
-
-#if defined(heltec_wifi_kit_32)  
-    /*--------------------------------------------------------------------
-     Heltec OLED display initialization.
+/*--------------------------------------------------------------------
+     NoName OLED display initialization.
     ---------------------------------------------------------------------*/
-    g_OLED.begin();
-    g_OLED.clear();
-    g_OLED.setFont(u8g2_font_profont15_tf);
-    g_lineHeight = g_OLED.getFontAscent() - g_OLED.getFontDescent(); // Descent is a negative number so we add it to the total
-    g_OLED.clearBuffer();
-    g_OLED.setCursor(0, g_lineHeight);
-    g_OLED.printf("Connecting to WiFi...");
-    g_OLED.sendBuffer();
-#endif  
-
+#if defined(chia_led)
+    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println("WiFi...");
+    display.display();
+#endif
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
     ---------------------------------------------------------------------*/
     startWifi();
+    checkSPIFFS();
     startUpdateServer();
 
     /*--------------------------------------------------------------------
@@ -112,35 +102,51 @@ void setup()
 void loop()
 {
 
-#if defined(heltec_wifi_kit_32)  
     /*--------------------------------------------------------------------
-        Update oled every second
+        Update oled every second with your text
     ---------------------------------------------------------------------*/
+#if defined(chia_led)
     if (millis() - lastUpdate > 1000)
     {
-        g_OLED.clearBuffer();
-        g_OLED.setCursor(0, g_lineHeight);
-        g_OLED.printf("IP: %s", globalIP.c_str());
-        g_OLED.setCursor(0, g_lineHeight * 2);
-        g_OLED.printf("%s", hostName.c_str());
-        g_OLED.setCursor(0, g_lineHeight * 3);
-        g_OLED.printf("SSID: %s", ssid.c_str());
-        g_OLED.setCursor(0, g_lineHeight * 4);
-        g_OLED.printf("Connected: %s", String(isWiFiConnected()).c_str());
-        g_OLED.sendBuffer();
+        display.clearDisplay();
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.setCursor(0, 0);
+        display.println(globalIP);
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.setCursor(0, 17);
+        display.println("Uptime: " + zUtils::getMidTime());
+        display.display();
         lastUpdate = millis();
     }
-#endif  
+#endif
 
     /*--------------------------------------------------------------------
      Project specific loop code
     ---------------------------------------------------------------------*/
 
-     // Your code here.
+    // Your code here.
 
     /*--------------------------------------------------------------------
      Required for web server and OTA updates
     ---------------------------------------------------------------------*/
     httpServer.handleClient();
     delay(1);
+}
+
+/*--------------------------------------------------------------------
+     Project specific utility code (otherwise use zUtils.h)
+    ---------------------------------------------------------------------*/
+String checkSPIFFS()
+{
+    // SPIFFs support
+    if (!SPIFFS.begin(true))
+    {
+        return "An Error has occurred while mounting SPIFFS";
+    }
+    else
+    {
+        return "SPIFFS mounted OK.";
+    }
 }
