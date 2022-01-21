@@ -14,7 +14,7 @@ namespace zUtils
         seconds %= 60;
         minutes %= 60;
         hours %= 24;
-        String time = String(days) + "d " + String(hours) + "h " + String(minutes) + "m " + String(seconds) + "s " + String(currentMillis) + "ms";
+        String time = String(days) + "d " + String(hours) + ":" + String(minutes) + ":" + String(seconds) + ":" + String(currentMillis) + "ms";
         return time;
     }
 
@@ -29,7 +29,7 @@ namespace zUtils
         seconds %= 60;
         minutes %= 60;
         hours %= 24;
-        String time = String(days) + "d " + String(hours) + "h " + String(minutes) + "m " + String(seconds) + "s ";
+        String time = String(days) + "d " + String(hours) + ":" + String(minutes) + ":" + String(seconds) + "s ";
         return time;
     }
 

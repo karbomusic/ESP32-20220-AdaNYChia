@@ -39,9 +39,10 @@
 
 #include <Arduino.h>
 #include "SPIFFS.h"
+#include <zUtils.h>
 #include <localWiFi.h>
 #include <localUpdateServer.h>
-#include <zUtils.h>
+
 
 // OLED display
 #if defined(chia_led)

@@ -104,24 +104,22 @@ void startUpdateServer()
 void handleAbout()
 {
     bangLED(HIGH);
-    String aboutResponse;
-    aboutResponse.reserve(1024);
-    aboutResponse = "<body style=\"background-color:#3498db;color:#ffffff;font-family:arial\"><b>[About ESP32]</b><br><br>";
-    aboutResponse += "<b>Device Family:</b> " + deviceFamily + "<br>";
-    aboutResponse += "<b>ESP Chip Model:</b> " + String(ESP.getChipModel()) + "<br>";
-    aboutResponse += "<b>CPU Frequency:</b> " + String(ESP.getCpuFreqMHz()) + "<br>";
-    aboutResponse += "<b>Free Heap Mem:</b> " + String(ESP.getFreeHeap()) + "<br>";
-    aboutResponse += "<b>Flash Mem Size:</b> " + String(ESP.getFlashChipSize() / 1024 / 1024) + " MB<br>";
-    aboutResponse += "<b>Hostname:</b> " + hostName + "<br>";
-    aboutResponse += "<b>IPAddress:</b> " + globalIP + "<br>";
-    aboutResponse += "<b>MAC Address:</b> " + String(WiFi.macAddress()) + "<br>";
-    aboutResponse += "<b>Software Version:</b> " + softwareVersion + "<br>";
-    aboutResponse += "<b>SSID:</b> " + ssid + "<br>";
-    aboutResponse += "<b>Description:</b> " + description + "<br>";
-    aboutResponse += "<b>Uptime:</b> " + String(millis()/1000/60) + " minutes<br>";
-    aboutResponse += "<b>Update:</b> http://" + hostName + ".ra.local/update<br><br>";
-    aboutResponse += "<button onclick=\"window.location.href='/restart'\">Restart</button></body>";
-    aboutResponse += "&nbsp;&nbsp;<button onclick=\"window.location.href='/update'\">Update</button></body>";
+    String aboutResponse = "<body style=\"background-color:#3498db;color:#ffffff;font-family:arial\"><b>[About ESP32]</b><br><br>"
+    "<b>Device Family:</b> " + deviceFamily + "<br>"
+    "<b>ESP Chip Model:</b> " + String(ESP.getChipModel()) + "<br>"
+    "<b>CPU Frequency:</b> " + String(ESP.getCpuFreqMHz()) + "<br>"
+    "<b>Free Heap Mem:</b> " + String(ESP.getFreeHeap()) + "<br>"
+    "<b>Flash Mem Size:</b> " + String(ESP.getFlashChipSize() / 1024 / 1024) + " MB<br>"
+    "<b>Hostname:</b> " + hostName + "<br>"
+    "<b>IPAddress:</b> " + globalIP + "<br>"
+    "<b>MAC Address:</b> " + String(WiFi.macAddress()) + "<br>"
+    "<b>Software Version:</b> " + softwareVersion + "<br>"
+    "<b>SSID:</b> " + ssid + "<br>"
+    "<b>Description:</b> " + description + "<br>"
+    "<b>Uptime:</b> " + zUtils::getLongTime() + "<br>"
+    "<b>Update:</b> http://" + hostName + ".ra.local/update<br><br>"
+    "<button onclick=\"window.location.href='/restart'\">Restart</button></body>"
+    "&nbsp;&nbsp;<button onclick=\"window.location.href='/update'\">Update</button></body>";
     httpServer.send(200, "text/html", aboutResponse);
     httpServer.sendHeader("Connection", "close");
     bangLED(LOW);
