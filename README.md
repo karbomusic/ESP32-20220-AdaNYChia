@@ -5,7 +5,7 @@ https://www.amazon.com/gp/product/B08CDN5PSJ
 
 ![image info](./assets/oled.png)
 
-===================
+===========================================================
 
 **Dependency Graph:**
     
@@ -37,4 +37,3 @@ https://www.amazon.com/gp/product/B08CDN5PSJ
     |   |-- <Wire> 1.0.1       
     |   |-- <SPI> 1.0
     |-- <Wire> 1.0.1
-`
