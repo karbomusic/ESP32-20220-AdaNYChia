@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ledman!</title>
+    <!-- <link href="styles.css" type="text/css" rel="stylesheet"> -->
+    <script type=text/javascript>
+        function makeHttpObject()  {
+            try { return new XMLHttpRequest(); }
+            catch (error) { }
+            try { return new ActiveXObject("Msxml2.XMLHTTP"); }
+            catch (error) { }
+            try { return new ActiveXObject("Microsoft.XMLHTTP"); }
+            catch (error) { } 
+        }
+        function navigate(value){
+                var request = makeHttpObject();
+                console.log(this.document.location + value);
+                request.open("GET", this.document.location + value, false);
+                request.send();
+        }
+    </script>
+    <style>
+        body {
+            font-family: calibri, arial;
+            background-color: #141d27;
+            color: #dddddd;
+        }
+
+        .center {
+            margin-left: auto;
+            margin-right: auto;
+            width: 13em;
+        }
+
+        .button {
+            background-color: #3c5168;
+            color: #dddddd;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+            width: 10em;
+            height: 2.2em;
+            font-size: 1.2em;
+            border: 0;
+        }
+
+        .smallButton {
+            background-color: rgb(52, 97, 146);
+            color: #dddddd;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+            width: 50px;
+            height: 30px;
+            font-size: 10pt;
+            border: 0;
+        }
+
+        .button:active {
+            background-color: #dddddd;
+            color: #223344;
+        }
+
+        .smallButton:active {
+            background-color: #dddddd;
+            color: #223344;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1 style="text-align: center;">Studio LED Matrix</h1>
+        <br>
+        <div class="center"><button class="button" onclick="navigate('1')">Random Dots</button></div>
+        <div class="center"><button class="button" onclick="navigate('2')">Random Dots 2</button></div>
+        <div class="center"><button class="button" onclick="navigate('3')">Noise</button></div>
+        <div class="center"><button class="button" onclick="navigate('4')">Blue Jumper</button></div>
+        <div class="center"><button class="button" onclick="navigate('5')">Purple Jumper</button></div>
+        <div class="center"><button class="button" onclick="navigate('6')">Scroll Color</button></div>
+        <div class="center"><button class="button" onclick="navigate('7')">Flash Color</button></div>
+        <div class="center"><button class="button" onclick="navigate('8')">Left to Right</button></div>
+        <div class="center"><button class="button" onclick="navigate('')">Off</button></div>
+        <br>
+        <div class=center>
+        <button class="smallButton" onclick="navigate('10')">10%</button>&nbsp;
+        <button class="smallButton" onclick="navigate('20')">20%</button>&nbsp;
+        <button class="smallButton" onclick="navigate('40')">40%</button>&nbsp;
+        <button class="smallButton" onclick="navigate('60')">60%</button>&nbsp;
+        <button class="smallButton" onclick="navigate('80')">80%</button>&nbsp;
+       <button  class="smallButton" onclick="navigate('100')">100%</button>
+       </div>
+    </div>
+</body>
+</html>

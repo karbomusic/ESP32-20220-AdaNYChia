@@ -51,6 +51,7 @@ void startWifi()
 
     // We're connected...
     WiFi.setHostname(hostName.c_str());
+    WiFi.hostname(hostName.c_str());
     Serial.println("\n-------------------------------------");
     Serial.println("WiFi connected");
     Serial.print("IP address: ");
@@ -70,6 +71,7 @@ void startWifi()
             delay(1000);
         }
     }
+    mdns_hostname_set(hostName.c_str());
 }
 
 bool isWiFiConnected(){
