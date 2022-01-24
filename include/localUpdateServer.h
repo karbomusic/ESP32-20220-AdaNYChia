@@ -35,7 +35,7 @@ String getControlPanelHTML();
 String updateHtml;
 String controlPanelHtml;
 
-int requestValue = 0; // to inform loop which request was made (needs event).
+int requestValue = 0;     // to inform loop which request was made (needs event).
 uint8_t briteValue = 255; // used to inform loop new brightness value.
 const char *currentAnimation = "Server ready...";
 bool isUpdating = false;
@@ -43,7 +43,7 @@ bool isUpdating = false;
 // Start the server
 void startUpdateServer()
 {
-   // listAllFiles();
+    // listAllFiles();
     updateHtml = getUpdateHTML();
     controlPanelHtml = getControlPanelHTML();
     Serial.println("mDNS responder started");
@@ -51,105 +51,86 @@ void startUpdateServer()
     // handlers for url paths
     httpServer.on("/", HTTP_GET, []()
                   {
-                      httpServer.sendHeader("Connection", "close");
-                      httpServer.send(200, "text/html", controlPanelHtml);
-                      requestValue = 0; // lights out
-                      currentAnimation = "Lights Out";
+                      if (httpServer.arg("brite") != "") // brightness slider
+                      {
+                          uint8_t val = atoi(httpServer.arg(0).c_str());
+                          Serial.println(String(val));
+                          if (val > 0 && val <= 255)
+                          {
+                              briteValue = val;
+                          }
+                          httpServer.send(200, "text/plain", "Brightness=" + briteValue);
+                          httpServer.sendHeader("Connection", "close");
+                      }
+                      else
+                      {
+                          httpServer.send(200, "text/html", controlPanelHtml);
+                          requestValue = 0; // lights out
+                          currentAnimation = "Lights Out";
+                      }
                   });
     httpServer.on("/1", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "RandomDots");
-                  requestValue = 1;
-                  currentAnimation = "RandomDots";
-              });
+                  {
+                      httpServer.send(200, "text/plain", "RandomDots");
+                      requestValue = 1;
+                      currentAnimation = "RandomDots";
+                  });
 
     httpServer.on("/2", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "RandomDots2");
-                  requestValue = 2;
-                  currentAnimation = "RandomDots2";
-              });
+                  {
+                      httpServer.send(200, "text/plain", "RandomDots2");
+                      requestValue = 2;
+                      currentAnimation = "RandomDots2";
+                  });
 
     httpServer.on("/3", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "AnalogNoise");
-                  requestValue = 3;
-                  currentAnimation = "AnalogNoise";
-              });
+                  {
+                      httpServer.send(200, "text/plain", "AnalogNoise");
+                      requestValue = 3;
+                      currentAnimation = "AnalogNoise";
+                  });
 
     httpServer.on("/4", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "RandomBlueJumper");
-                  requestValue = 4;
-                  currentAnimation = "RandomBlueJumper";
-              });
+                  {
+                      httpServer.send(200, "text/plain", "RandomBlueJumper");
+                      requestValue = 4;
+                      currentAnimation = "RandomBlueJumper";
+                  });
 
     httpServer.on("/5", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "RandomPurpleJumper");
-                  requestValue = 5;
-                  currentAnimation = "RandomRedJumper";
-              });
+                  {
+                      httpServer.send(200, "text/plain", "RandomPurpleJumper");
+                      requestValue = 5;
+                      currentAnimation = "RandomRedJumper";
+                  });
 
     httpServer.on("/6", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "ScrollColor");
-                  requestValue = 6;
-                  currentAnimation = "ScrollColor";
-              });
+                  {
+                      httpServer.send(200, "text/plain", "ScrollColor");
+                      requestValue = 6;
+                      currentAnimation = "ScrollColor";
+                  });
 
     httpServer.on("/7", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "FlashColor");
-                  requestValue = 7;
-                  currentAnimation = "FlashColor";
-              });
+                  {
+                      httpServer.send(200, "text/plain", "FlashColor");
+                      requestValue = 7;
+                      currentAnimation = "FlashColor";
+                  });
 
     httpServer.on("/8", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "Left 2 Right");
-                  requestValue = 8;
-                  currentAnimation = "LeftToRight";
-              });
+                  {
+                      httpServer.send(200, "text/plain", "Left 2 Right");
+                      requestValue = 8;
+                      currentAnimation = "LeftToRight";
+                  });
 
-// Brightness --------------------------------
-
-    httpServer.on("/10", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "Brightness 20'ish");
-                  briteValue = 10;
-              });
-    httpServer.on("/20", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "Brightness 50");
-                  briteValue = 50;
-              });
-    httpServer.on("/40", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "Brightness 100");
-                  briteValue = 100;
-              });
-    httpServer.on("/60", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "Brightness 150");
-                  briteValue = 150;
-              });
-    httpServer.on("/80", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "Brightness 200");
-                  briteValue = 200;
-              });
-    httpServer.on("/100", HTTP_GET, []()
-              {
-                  httpServer.send(200, "text/plain", "Brightness 255");
-                  briteValue = 255;
-              });
-        httpServer.onNotFound( []()
-              {
-                  httpServer.sendHeader("Connection", "close");
-                  httpServer.send(404, "text/plain", "404 - Not Found");
-                  briteValue = 255;
-              });
+    httpServer.onNotFound([]()
+                          {
+                              httpServer.sendHeader("Connection", "close");
+                              httpServer.send(404, "text/plain", "404 - Not Found");
+                              ;
+                          });
     httpServer.on("/about", HTTP_GET, handleAbout);
     httpServer.on("/restart", handleRestart);
     httpServer.on(
@@ -220,23 +201,37 @@ void handleAbout()
 {
     bangLED(HIGH);
     String aboutResponse = "<head><style type=\"text/css\">.button:active{background-color:#cccccc;color:#111111}></style><head>"
-    "<body style=\"background-color:#141d27;color:#dddddd;font-family:arial\"><b>[About ESP32]</b><br><br>"
-    "<b>Device Family:</b> " + deviceFamily + "<br>"
-    "<b>ESP Chip Model:</b> " + String(ESP.getChipModel()) + "<br>"
-    "<b>CPU Frequency:</b> " + String(ESP.getCpuFreqMHz()) + "<br>"
-    "<b>Free Heap Mem:</b> " + String(ESP.getFreeHeap()) + "<br>"
-    "<b>Flash Mem Size:</b> " + String(ESP.getFlashChipSize() / 1024 / 1024) + " MB<br>"
-    "<b>Hostname:</b> " + hostName + "<br>"
-    "<b>IPAddress:</b> " + globalIP + "<br>"
-    "<b>MAC Address:</b> " + String(WiFi.macAddress()) + "<br>"
-    "<b>SSID: </b> " + ssid + "<br>"
-    "<b>RSSI: </b> " + String(WiFi.RSSI()) + " dB<br>"
-    "<b>Software Version:</b> " + softwareVersion + "<br>"
-    "<b>Description:</b> " + description + "<br>"
-    "<b>Uptime:</b> " + zUtils::getMidTime() + "<br>"
-    "<b>Update:</b> http://" + hostName + ".ra.local/update<br><br>"
-    "<button class=\"button\" style=\"width:100px;height:30px;border:0;background-color:#3c5168;color:#dddddd\" onclick=\"window.location.href='/restart'\">Restart</button></body>"
-    "&nbsp;&nbsp;<button class=\"button\" style=\"width:100px;height:30px;border:0;background-color:#3c5168;color:#dddddd\" onclick=\"window.location.href='/update'\">Update</button></body>";
+                           "<body style=\"background-color:#141d27;color:#dddddd;font-family:arial\"><b>[About ESP32]</b><br><br>"
+                           "<b>Device Family:</b> " +
+                           deviceFamily + "<br>"
+                                          "<b>ESP Chip Model:</b> " +
+                           String(ESP.getChipModel()) + "<br>"
+                                                        "<b>CPU Frequency:</b> " +
+                           String(ESP.getCpuFreqMHz()) + "<br>"
+                                                         "<b>Free Heap Mem:</b> " +
+                           String(ESP.getFreeHeap()) + "<br>"
+                                                       "<b>Flash Mem Size:</b> " +
+                           String(ESP.getFlashChipSize() / 1024 / 1024) + " MB<br>"
+                                                                          "<b>Hostname:</b> " +
+                           hostName + "<br>"
+                                      "<b>IPAddress:</b> " +
+                           globalIP + "<br>"
+                                      "<b>MAC Address:</b> " +
+                           String(WiFi.macAddress()) + "<br>"
+                                                       "<b>SSID: </b> " +
+                           ssid + "<br>"
+                                  "<b>RSSI: </b> " +
+                           String(WiFi.RSSI()) + " dB<br>"
+                                                 "<b>Software Version:</b> " +
+                           softwareVersion + "<br>"
+                                             "<b>Description:</b> " +
+                           description + "<br>"
+                                         "<b>Uptime:</b> " +
+                           zUtils::getMidTime() + "<br>"
+                                                  "<b>Update:</b> http://" +
+                           hostName + ".ra.local/update<br><br>"
+                                      "<button class=\"button\" style=\"width:100px;height:30px;border:0;background-color:#3c5168;color:#dddddd\" onclick=\"window.location.href='/restart'\">Restart</button></body>"
+                                      "&nbsp;&nbsp;<button class=\"button\" style=\"width:100px;height:30px;border:0;background-color:#3c5168;color:#dddddd\" onclick=\"window.location.href='/update'\">Update</button></body>";
     httpServer.send(200, "text/html", aboutResponse);
     httpServer.sendHeader("Connection", "close");
     bangLED(LOW);
@@ -277,13 +272,13 @@ void bangLED(int state)
 
 String getControlPanelHTML()
 {
-    String cpHTML = "";\
-    
+    String cpHTML = "";
+
     File file = SPIFFS.open("/index.html");
     if (file && file.available() && file.size() > 0)
     {
         cpHTML = file.readString();
-         Serial.println("cpHTML loaded!");
+        Serial.println("cpHTML loaded!");
     }
     else
     {

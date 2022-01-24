@@ -47,12 +47,20 @@
 #include <FastLED.h>
 #include <oled.h>
 
-// LED Matric Config!
+// LED Matric Config - 256x8 Matrix
 const int DATA_PIN = 15; 
 const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
 const int NUM_LEDS = 256;
 const int NUM_ROWS = 8;
 const int NUM_COLS = 32;
+
+// LED Matric Config- 8 LED Strip
+// const int DATA_PIN = 5; 
+// const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
+// const int NUM_LEDS = 8;
+// const int NUM_ROWS = 0;
+// const int NUM_COLS = 32;
+
 CRGB leds[NUM_LEDS];
 
 // externs

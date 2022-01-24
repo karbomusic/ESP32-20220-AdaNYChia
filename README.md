@@ -1,9 +1,23 @@
-# ESP32-2022-Master
-This is the NYLED ESP32 project adapted for this OLED:
+# ESP32-2022-Master-AdaNYLEDs 
+This is the NYLED ESP32 project adapted for this OLED: https://www.amazon.com/gp/product/B08CDN5PSJ
 
-https://www.amazon.com/gp/product/B08CDN5PSJ
+![image info](./assets/oled.png) 
 
-![image info](./assets/oled.png)
+Works with strips and matrixes.  
+
+###OLED
+ OLED_WIDTH 128
+ OLED_HEIGHT 32
+ OLED_ADDR 0x3C
+ PINS: SCL=IO22, SCA=IO21 
+
+###MATRIX
+DATA_PIN = IO15
+NUM_LEDS = 256
+NUM_ROWS = 8;
+NUM_COLS = 32;
+
+Set rows=0 for LED Strips.
 
 ===========================================================
 

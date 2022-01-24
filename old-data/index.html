@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -22,14 +21,6 @@
                 request.open("GET", this.document.location + value, false);
                 request.send();
         }
-
-        function slide(bValue){
-            document.getElementById("briteval").innerHTML = bValue;
-            var request = makeHttpObject();
-            request.open("GET", '?brite=' + bValue, false);
-            request.send();
-        }
-
     </script>
     <style>
         body {
@@ -41,49 +32,7 @@
         .center {
             margin-left: auto;
             margin-right: auto;
-            width:200px;
-        }
-
-        .slidecontainer {
-            width: 12em;
-            margin-left: auto;
-            margin-right: auto;
-            border-radius: 5px;
-            text-align:center;
-        }
-
-
-        .slider {
-            -webkit-appearance: none;
-            width: 190px;
-            height: 35px;
-            background: #d3d3d3;
-            outline: none;
-            opacity: 0.7;
-            -webkit-transition: .2s;
-            transition: opacity .2s;
-            border-radius: 5px;
-        }
-
-        .slider:hover {
-            opacity: 1;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 35px;
-            background: rgb(52, 97, 146);
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .slider::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
-            background: #04AA6D;
-            cursor: pointer;
+            width: 13em;
         }
 
         .button {
@@ -123,7 +72,6 @@
         }
     </style>
 </head>
-
 <body>
     <div>
         <h1 style="text-align: center;">Studio LED Matrix</h1>
@@ -138,19 +86,14 @@
         <div class="center"><button class="button" onclick="navigate('8')">Left to Right</button></div>
         <div class="center"><button class="button" onclick="navigate('')">Off</button></div>
         <br>
-        <div class="slidecontainer">
-            <input type="range" onchange="slide(this.value)"  min="15" max="255" value="255" class="slider" id="bSlider">
-            <span id="briteval">Brightness</span>
-        </div>
-        <!-- <div class="center">
-            <button class="smallButton" onclick="navigate('10')">10%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('20')">20%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('40')">40%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('60')">60%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('80')">80%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('100')">100%</button>
-        </div> -->
+        <div class=center>
+        <button class="smallButton" onclick="navigate('10')">10%</button>&nbsp;
+        <button class="smallButton" onclick="navigate('20')">20%</button>&nbsp;
+        <button class="smallButton" onclick="navigate('40')">40%</button>&nbsp;
+        <button class="smallButton" onclick="navigate('60')">60%</button>&nbsp;
+        <button class="smallButton" onclick="navigate('80')">80%</button>&nbsp;
+       <button  class="smallButton" onclick="navigate('100')">100%</button>
+       </div>
     </div>
 </body>
-
 </html>
