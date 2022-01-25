@@ -48,14 +48,14 @@
 #include <oled.h>
 
 // LED Matric Config - 256x8 Matrix
-const int DATA_PIN = 15; 
+const int DATA_PIN = 15;
 const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
 const int NUM_LEDS = 256;
 const int NUM_ROWS = 16;
 const int NUM_COLS = 16;
 
 // LED Matric Config- 8 LED Strip
-// const int DATA_PIN = 5; 
+// const int DATA_PIN = 5;
 // const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
 // const int NUM_LEDS = 8;
 // const int NUM_ROWS = 0;
@@ -86,8 +86,6 @@ void printDisplayMessage(String msg);
 const int activityLED = 12;
 unsigned long lastUpdate = 0;
 
-
-
 void setup()
 {
     /*--------------------------------------------------------------------
@@ -107,11 +105,11 @@ void setup()
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
     ---------------------------------------------------------------------*/
-    printDisplayMessage ("Wifi...");
+    printDisplayMessage("Wifi...");
     startWifi();
-    printDisplayMessage ("SPIFFS..");
+    printDisplayMessage("SPIFFS..");
     checkSPIFFS();
-    printDisplayMessage ("Server...");
+    printDisplayMessage("Server...");
     startUpdateServer();
 
     /*--------------------------------------------------------------------
@@ -124,11 +122,13 @@ void setup()
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
 
-    // Kanimation mapping fix, call this first at setup:
+    // Reamap pixels to matrix, call this now if using a matrix
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
+
 }
 
-void printDisplayMessage(String msg){
+void printDisplayMessage(String msg)
+{
     display.clearDisplay();
     display.setTextSize(2);
     display.setTextColor(WHITE);
@@ -163,9 +163,9 @@ void loop()
      Project specific loop code
     ---------------------------------------------------------------------*/
 
- EVERY_N_MILLISECONDS(150)
+    EVERY_N_MILLISECONDS(150)
     {
-        if(briteValue > 0)
+        if (briteValue > 0)
         {
             FastLED.setBrightness(briteValue);
             FastLED.show();
@@ -209,12 +209,11 @@ void loop()
         case 7:
             flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
             break;
-        
+
         case 8:
             ltrDot(leds, gLeds, NUM_LEDS);
             break;
         }
-
     }
 
     /*--------------------------------------------------------------------
