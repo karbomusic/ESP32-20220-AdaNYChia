@@ -26,7 +26,8 @@ void startWifi()
      // Connect to WiFi network
     Serial.print("SSID: ");
     Serial.println(ssid);
-
+    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
+    WiFi.setHostname(hostName.c_str());
     WiFi.begin(ssid.c_str(), password.c_str());
     Serial.println("");
 
