@@ -17,7 +17,7 @@
 
 String ssid = STASSID;                         // WiFi ssid
 String password = STAPSK;                      // WiFi password
-String hostName = "ledtest";                    // hostname as seen on network
+String hostName = "ledman";                    // hostname as seen on network
 String softwareVersion = "1.23.22";            // used for OTA updates & about page
 String deviceFamily = "ESP32-Studio-Matrix";   // used for OTA updates & about page
 String description = "I'm a led matrix baby."; // used for about page

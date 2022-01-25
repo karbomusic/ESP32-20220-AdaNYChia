@@ -51,8 +51,8 @@
 const int DATA_PIN = 15; 
 const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
 const int NUM_LEDS = 256;
-const int NUM_ROWS = 8;
-const int NUM_COLS = 32;
+const int NUM_ROWS = 16;
+const int NUM_COLS = 16;
 
 // LED Matric Config- 8 LED Strip
 // const int DATA_PIN = 5; 
@@ -62,6 +62,7 @@ const int NUM_COLS = 32;
 // const int NUM_COLS = 32;
 
 CRGB leds[NUM_LEDS];
+int gLeds[NUM_LEDS];
 
 // externs
 extern Adafruit_SSD1306 display;
@@ -84,6 +85,7 @@ void printDisplayMessage(String msg);
 // locals
 const int activityLED = 12;
 unsigned long lastUpdate = 0;
+
 
 
 void setup()
@@ -121,6 +123,9 @@ void setup()
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
+
+    // Kanimation mapping fix, call this first at setup:
+    *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
 }
 
 void printDisplayMessage(String msg){
@@ -206,7 +211,7 @@ void loop()
             break;
         
         case 8:
-            ltrDot(leds, NUM_LEDS, NUM_ROWS, NUM_COLS);
+            ltrDot(leds, gLeds, NUM_LEDS);
             break;
         }
 

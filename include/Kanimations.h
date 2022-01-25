@@ -125,14 +125,12 @@ void flashColor(CRGB leds[], int ledNum, int color)
     return;
 }
 
-void ltrDot(CRGB leds[], int ledNum, int rows, int cols)
-{
-    
+int * getLtrTransform(int leds[], int ledNum, int rows, int cols){
+
     //----------------------------------------------------
     // Transform for LTR
     //----------------------------------------------------
     bool modVal = true;
-    int mappedLeds[ledNum];
     int bigHop = (rows * 2) - 1;
     int smallHop = 1;
     int cCol = 0;
@@ -159,13 +157,54 @@ void ltrDot(CRGB leds[], int ledNum, int rows, int cols)
             }
             modVal = !modVal;
             cCol++;
-            mappedLeds[i] = mappedVal;
+            leds[i] = mappedVal;
         }
     }
-    else
-    {
-        *mappedLeds = *leds;
-    }
+    return leds;
+}
+
+void ltrDot(CRGB leds[], int gTransform[], int ledNum)
+{
+
+    //----------------------------------------------------
+    // Transform for LTR
+    //----------------------------------------------------
+    // bool modVal = true;
+    // int mappedLeds[ledNum];
+    // int bigHop = (rows * 2) - 1;
+    // int smallHop = 1;
+    // int cCol = 0;
+    // int cRow = 0;
+    // int mappedVal = -1;
+
+    // // If a matrix instead of a strip, use the led count, rowcount and colcount 
+    // // to determine the mapping so looping through the array is left-to-right.
+    // if (rows > 0 && isFirstRun) 
+    // {
+    //     for (int i = 0; i < ledNum; i++)
+    //     {
+    //         if (cCol < cols)
+    //         {
+    //             mappedVal = (!modVal ? mappedVal + bigHop : mappedVal + smallHop);
+    //         }
+    //         else
+    //         {
+    //             cRow = cRow == rows ? 0 : cRow += 1;
+    //             cCol = 0;
+    //             mappedVal = cRow + cCol;
+    //             bigHop -= 2;
+    //             smallHop += 2;
+    //         }
+    //         modVal = !modVal;
+    //         cCol++;
+    //         leds[i] = mappedVal;
+    //     }
+    //     isFirstRun = false;
+    // }
+    // else
+    // {
+    //     *mappedLeds = *leds;
+    // }
 
     //----------------------------------------------------
     // Color and move the dot.
@@ -174,12 +213,37 @@ void ltrDot(CRGB leds[], int ledNum, int rows, int cols)
     // at every interation.
     //----------------------------------------------------
 
-    uint8_t randColor = random(0,255);
-    for (int i = 0; i < ledNum; i++)
-    {
-        leds[mappedLeds[i]] = CHSV(randColor, 255, 255);
+
+    // uint8_t randColor = random(0,255);
+    // for (int i = 0; i < ledNum; i++)
+    // {
+    //     leds[mappedLeds[i]] = CHSV(randColor, 255, 255);
+    //     FastLED.show();
+    //     delay(1);
+    //     FastLED.clear();
+    // }
+
+    static int ledIndex;
+    static uint8_t randomColor;
+   
+    EVERY_N_MILLISECONDS(30){
+       
+        leds[gTransform[ledIndex]] = CHSV(randomColor,255,200);
         FastLED.show();
-        delay(1);
-        FastLED.clear();
+        ledIndex++;
+        if(ledIndex==ledNum)
+        {
+            ledIndex = 0;
+        }
+       
     }
+
+    EVERY_N_MILLISECONDS(2)
+    {
+         fadeToBlackBy(leds, ledNum, 30);
+    }
+
+    if(ledIndex==0)
+        randomColor = random(0,255);
+
 }
