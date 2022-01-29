@@ -71,58 +71,58 @@ void startUpdateServer()
                   });
     httpServer.on("/1", HTTP_GET, []()
                   {
-                      httpServer.send(200, "text/plain", "RandomDots");
+                      httpServer.send(200, "text/plain", "Random Dots");
                       requestValue = 1;
-                      currentAnimation = "RandomDots";
+                      currentAnimation = "Random Dots";
                   });
 
     httpServer.on("/2", HTTP_GET, []()
                   {
-                      httpServer.send(200, "text/plain", "RandomDots2");
+                      httpServer.send(200, "text/plain", "Random Dots 2");
                       requestValue = 2;
-                      currentAnimation = "RandomDots2";
+                      currentAnimation = "Random Dots 2";
                   });
 
     httpServer.on("/3", HTTP_GET, []()
                   {
-                      httpServer.send(200, "text/plain", "AnalogNoise");
+                      httpServer.send(200, "text/plain", "Analog Noise");
                       requestValue = 3;
-                      currentAnimation = "AnalogNoise";
+                      currentAnimation = "Analog Noise";
                   });
 
     httpServer.on("/4", HTTP_GET, []()
                   {
-                      httpServer.send(200, "text/plain", "RandomBlueJumper");
+                      httpServer.send(200, "text/plain", "Random Blue Jumper");
                       requestValue = 4;
-                      currentAnimation = "RandomBlueJumper";
+                      currentAnimation = "Random Blue Jumper";
                   });
 
     httpServer.on("/5", HTTP_GET, []()
                   {
-                      httpServer.send(200, "text/plain", "RandomPurpleJumper");
+                      httpServer.send(200, "text/plain", "Random Purple Jumper");
                       requestValue = 5;
-                      currentAnimation = "RandomRedJumper";
+                      currentAnimation = "Random Purple Jumper";
                   });
 
     httpServer.on("/6", HTTP_GET, []()
                   {
-                      httpServer.send(200, "text/plain", "ScrollColor");
+                      httpServer.send(200, "text/plain", "Scroll Color");
                       requestValue = 6;
-                      currentAnimation = "ScrollColor";
+                      currentAnimation = "Scroll Color";
                   });
 
     httpServer.on("/7", HTTP_GET, []()
                   {
-                      httpServer.send(200, "text/plain", "FlashColor");
+                      httpServer.send(200, "text/plain", "Flash Color");
                       requestValue = 7;
-                      currentAnimation = "FlashColor";
+                      currentAnimation = "Flash Color";
                   });
 
     httpServer.on("/8", HTTP_GET, []()
                   {
                       httpServer.send(200, "text/plain", "Left 2 Right");
                       requestValue = 8;
-                      currentAnimation = "LeftToRight";
+                      currentAnimation = "Left-To-Right";
                   });
 
     httpServer.onNotFound([]()
@@ -148,7 +148,7 @@ void startUpdateServer()
                 httpServer.sendHeader("Connection", "close");
                 httpServer.send(200, "text/plain", (Update.hasError()) ? "FAIL... Restarting in 5 seconds" : "OK... Restarting in 5 seconds");
                 isUpdating = false;
-                delay(5000);
+                delay(3000);
                 ESP.restart();
             }
             else

@@ -48,20 +48,21 @@
 #include <oled.h>
 
 // LED Matric Config - 256x8 Matrix
-const int DATA_PIN = 15; 
-const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
-const int NUM_LEDS = 256;
-const int NUM_ROWS = 8;
-const int NUM_COLS = 32;
+// Set NUM_ROWS=1 for a single row strip.
+const int DATA_PIN = 5;
+const int NUM_LEDS = 265;
+const int NUM_ROWS = 1;
+const int NUM_COLS = 0;
 
 // LED Matric Config- 8 LED Strip
-// const int DATA_PIN = 5; 
+// const int DATA_PIN = 5;
 // const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
 // const int NUM_LEDS = 8;
 // const int NUM_ROWS = 0;
 // const int NUM_COLS = 32;
 
 CRGB leds[NUM_LEDS];
+int gLeds[NUM_LEDS];
 
 // externs
 extern Adafruit_SSD1306 display;
@@ -85,7 +86,6 @@ void printDisplayMessage(String msg);
 const int activityLED = 12;
 unsigned long lastUpdate = 0;
 
-
 void setup()
 {
     /*--------------------------------------------------------------------
@@ -97,33 +97,35 @@ void setup()
     Serial.println();
     Serial.println("Booting...");
     zUtils::getChipInfo();
-    pinMode(PWR_PIN, OUTPUT);
-    digitalWrite(PWR_PIN, HIGH);
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
 
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
     ---------------------------------------------------------------------*/
-    printDisplayMessage ("Wifi...");
+    printDisplayMessage("Wifi...");
     startWifi();
-    printDisplayMessage ("SPIFFS..");
+    printDisplayMessage("SPIFFS..");
     checkSPIFFS();
-    printDisplayMessage ("Server...");
+    printDisplayMessage("Server...");
     startUpdateServer();
 
     /*--------------------------------------------------------------------
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 5000);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1500);
     FastLED.setBrightness(255);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
+
+    // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
+    *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
 }
 
-void printDisplayMessage(String msg){
+void printDisplayMessage(String msg)
+{
     display.clearDisplay();
     display.setTextSize(2);
     display.setTextColor(WHITE);
@@ -134,7 +136,6 @@ void printDisplayMessage(String msg){
 
 void loop()
 {
-
     /*--------------------------------------------------------------------
         Update oled every second with your text
     ---------------------------------------------------------------------*/
@@ -158,9 +159,9 @@ void loop()
      Project specific loop code
     ---------------------------------------------------------------------*/
 
- EVERY_N_MILLISECONDS(150)
+    EVERY_N_MILLISECONDS(150)
     {
-        if(briteValue > 0)
+        if (briteValue > 0)
         {
             FastLED.setBrightness(briteValue);
             FastLED.show();
@@ -204,12 +205,11 @@ void loop()
         case 7:
             flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
             break;
-        
+
         case 8:
-            ltrDot(leds, NUM_LEDS, NUM_ROWS, NUM_COLS);
+            ltrDot(leds, gLeds, NUM_LEDS);
             break;
         }
-
     }
 
     /*--------------------------------------------------------------------
@@ -221,7 +221,7 @@ void loop()
 
 /*--------------------------------------------------------------------
      Project specific utility code (otherwise use zUtils.h)
-    ---------------------------------------------------------------------*/
+---------------------------------------------------------------------*/
 String checkSPIFFS()
 {
     // SPIFFs support
