@@ -45,27 +45,26 @@
 #include <Kanimations.h>
 #include <localUpdateServer.h>
 #include <FastLED.h>
-#include <oled.h>
 
 // LED Matric Config - 256x8 Matrix
-// Set NUM_ROWS=1 for a single row strip.
-const int DATA_PIN = 5;
-const int NUM_LEDS = 265;
-const int NUM_ROWS = 1;
-const int NUM_COLS = 0;
+// const int DATA_PIN = 15;
+// const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
+// const int NUM_LEDS = 256;
+// const int NUM_ROWS = 16;
+// const int NUM_COLS = 16;
 
 // LED Matric Config- 8 LED Strip
-// const int DATA_PIN = 5;
-// const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
-// const int NUM_LEDS = 8;
-// const int NUM_ROWS = 0;
-// const int NUM_COLS = 32;
+const int DATA_PIN = 5;
+const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
+const int NUM_LEDS = 24;
+const int NUM_ROWS = 0;
+const int NUM_COLS = 0;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
 
 // externs
-extern Adafruit_SSD1306 display;
+//extern Adafruit_SSD1306 display;
 extern WebServer httpServer;
 extern void startWifi();
 extern void startUpdateServer();
@@ -92,69 +91,73 @@ void setup()
      Boot, Oled and I/O initialization.
     ---------------------------------------------------------------------*/
     Serial.begin(115200);
-    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
-    printDisplayMessage("Boot...");
+    // display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
+    // printDisplayMessage("Boot...");
     Serial.println();
     Serial.println("Booting...");
     zUtils::getChipInfo();
+    pinMode(PWR_PIN, OUTPUT);
+    digitalWrite(PWR_PIN, HIGH);
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
 
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
     ---------------------------------------------------------------------*/
-    printDisplayMessage("Wifi...");
+    //printDisplayMessage("Wifi...");
     startWifi();
-    printDisplayMessage("SPIFFS..");
+    //  printDisplayMessage("SPIFFS..");
     checkSPIFFS();
-    printDisplayMessage("Server...");
+    // printDisplayMessage("Server...");
     startUpdateServer();
 
     /*--------------------------------------------------------------------
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1500);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 5000);
     FastLED.setBrightness(255);
     FastLED.setCorrection(TypicalLEDStrip);
+    setNumLeds(NUM_LEDS); //Kanimations
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
 
-    // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
-    *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
+    // Reamap pixels to matrix, call this now if using a matrix
+    *gLeds = *getLtrTransform(gLeds, NUM_ROWS, NUM_COLS);
 }
 
-void printDisplayMessage(String msg)
-{
-    display.clearDisplay();
-    display.setTextSize(2);
-    display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    display.println(msg);
-    display.display();
-}
+// void printDisplayMessage(String msg)
+// {
+//     display.clearDisplay();
+//     display.setTextSize(2);
+//     display.setTextColor(WHITE);
+//     display.setCursor(0, 0);
+//     display.println(msg);
+//     display.display();
+// }
 
 void loop()
 {
+
     /*--------------------------------------------------------------------
         Update oled every second with your text
     ---------------------------------------------------------------------*/
-    if (millis() - lastUpdate > 1000)
-    {
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-        display.setCursor(0, 0);
-        display.println(globalIP);
-        display.setCursor(0, 9);
-        display.println("Up: " + zUtils::getMidTime());
-        display.setCursor(0, 17);
-        display.println("Signal: " + String(WiFi.RSSI()) + " dBm");
-        display.setCursor(0, 25);
-        display.println(currentAnimation);
-        display.display();
-        lastUpdate = millis();
-    }
+    // if (millis() - lastUpdate > 1000)
+    // {
+    //     display.clearDisplay();
+    //     display.setTextSize(1);
+    //     display.setTextColor(WHITE);
+    //     display.setCursor(0, 0);
+    //     display.println(globalIP);
+    //     display.setCursor(0, 9);
+    //     display.println("Up: " + zUtils::getMidTime());
+    //     display.setCursor(0, 17);
+    //     display.println("Signal: " + String(WiFi.RSSI()) + " dBm");
+    //     display.setCursor(0, 25);
+    //     display.println(currentAnimation);
+    //     display.display();
+    //     lastUpdate = millis();
+    // }
     /*--------------------------------------------------------------------
      Project specific loop code
     ---------------------------------------------------------------------*/
@@ -172,6 +175,8 @@ void loop()
     EVERY_N_MILLISECONDS(10) // check requestValue from localWebServer and choose animation or brightness
     {
 
+        requestValue = 9;
+
         switch (requestValue)
         {
         case 0:
@@ -179,35 +184,39 @@ void loop()
             break;
 
         case 1:
-            randomDots(leds, NUM_LEDS);
+            randomDots(leds);
             break;
 
         case 2:
-            randomDots2(leds, NUM_LEDS);
+            randomDots2(leds);
             break;
 
         case 3:
-            randomNoise(leds, NUM_LEDS);
+            randomNoise(leds);
             break;
 
         case 4:
-            randomBlueJumper(leds, NUM_LEDS);
+            randomBlueJumper(leds);
             break;
 
         case 5:
-            randomPurpleJumper(leds, NUM_LEDS);
+            randomPurpleJumper(leds);
             break;
 
         case 6:
-            dotScrollRandomColor(leds, NUM_LEDS);
+            dotScrollRandomColor(leds);
             break;
 
         case 7:
-            flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
+            flashColor(leds, CRGB::OrangeRed);
             break;
 
         case 8:
-            ltrDot(leds, gLeds, NUM_LEDS);
+            ltrDot(leds, gLeds);
+            break;
+
+        case 9:
+            modMation(leds);
             break;
         }
     }
@@ -221,7 +230,7 @@ void loop()
 
 /*--------------------------------------------------------------------
      Project specific utility code (otherwise use zUtils.h)
----------------------------------------------------------------------*/
+    ---------------------------------------------------------------------*/
 String checkSPIFFS()
 {
     // SPIFFs support

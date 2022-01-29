@@ -1,3 +1,6 @@
+
+
+
 /*+===================================================================
   File:      Kanimations.h
 
@@ -7,6 +10,9 @@
 ===================================================================+*/
 #include <Arduino.h>
 #include <FastLED.h>
+FASTLED_USING_NAMESPACE
+
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 // Structure for remebering a pixel's color.
 // Had to name to sLED due to some conflict
@@ -21,18 +27,30 @@ struct sLED
 sLED previousLED;
 int currentLEDNum = 0;
 const int ANALONG_PIN = 34;
+int LED_COUNT;
 
+uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 void clearLeds()
 {
     FastLED.clear(true);
 }
 
 // prototypes
-int *getLtrTransform(int leds[], int ledNum, int rows = 0, int cols = 0);
+int *getLtrTransform(int leds[], int rows = 0, int cols = 0);
+void rainbowWithGlitter();
+void addGlitter(CRGB leds[], fract8 chanceOfGlitter);
+void confetti(CRGB leds[]);
+void sinelon(CRGB leds[]);
+void bpm(CRGB leds[]);
+void juggle(CRGB leds[]);
 
-void randomDots2(CRGB leds[], int ledNum)
+void setNumLeds(int numLeds){
+    LED_COUNT = numLeds;
+}
+
+void randomDots2(CRGB leds[])
 {
-    currentLEDNum = random(ledNum - 1);
+    currentLEDNum = random(LED_COUNT);
     sLED currentLED;
     currentLED.index = currentLEDNum;
     currentLED.H = random(255);
@@ -48,9 +66,9 @@ void randomDots2(CRGB leds[], int ledNum)
     return;
 }
 
-void randomDots(CRGB leds[], int ledNum)
+void randomDots(CRGB leds[])
 {
-    currentLEDNum = random(ledNum - 1);
+    currentLEDNum = random(LED_COUNT);
     sLED currentLED;
     currentLED.index = currentLEDNum;
     currentLED.H = random(255);
@@ -59,12 +77,11 @@ void randomDots(CRGB leds[], int ledNum)
     leds[currentLEDNum] = CHSV(currentLED.H, currentLED.S, currentLED.V);
     FastLED.show();
     leds[currentLED.index] = CHSV(0, 0, 0);
-    FastLED.clear();
 }
 
-void randomNoise(CRGB leds[], int ledNum)
+void randomNoise(CRGB leds[])
 {
-    for (int i = 0; i < ledNum; i++)
+    for (int i = 0; i < LED_COUNT; i++)
     {
         leds[i] = CHSV(random(255), random(100, 255), random(1, 64));
     }
@@ -73,64 +90,61 @@ void randomNoise(CRGB leds[], int ledNum)
     return;
 }
 
-void randomPurpleJumper(CRGB leds[], int ledNum)
+void randomPurpleJumper(CRGB leds[])
 {
-    for (int i = 0; i < ledNum; i++)
+    for (int i = 0; i < LED_COUNT; i++)
     {
         leds[i] = CHSV(random(127, 250), random(100, 255), random(1, 64));
     }
-    leds[random(ledNum)] = CRGB(255, 255, 255);
+    leds[random(LED_COUNT)] = CRGB(255, 255, 255);
     FastLED.show();
     FastLED.clear();
     return;
 }
 
-void randomBlueJumper(CRGB leds[], int ledNum)
+void randomBlueJumper(CRGB leds[])
 {
-    for (int i = 0; i < ledNum; i++)
+    for (int i = 0; i < LED_COUNT; i++)
     {
         leds[i] = CHSV(random(86, 172), random(100, 255), random(1, 64));
     }
-    leds[random(ledNum)] = CRGB(255, 255, 255);
+    leds[random(LED_COUNT)] = CRGB(255, 255, 255);
     FastLED.show();
     FastLED.clear();
     return;
 }
 
-void dotScrollRandomColor(CRGB leds[], int ledNum)
+void dotScrollRandomColor(CRGB leds[])
 {
-    for (int i = 0; i < ledNum; i += 3)
+    for (int i = 0; i < LED_COUNT; i++)
     {
-        if (i < ledNum) // cuz 3
-        {
-            leds[i] = CHSV(random(0, 255), 255, 150);
-            leds[random(ledNum)] = CHSV(128, 150, 100);
-            FastLED.show();
-            delay(22);
-            FastLED.clear();
-        }
+        leds[i] = CHSV(random(0, 255), 255, 150);
+        leds[random(LED_COUNT)] = CHSV(128, 150, 100);
+        FastLED.show();
+        delay(22);
+        FastLED.clear();
     }
     return;
 }
 
-void flashColor(CRGB leds[], int ledNum, int color)
+void flashColor(CRGB leds[], int color)
 {
     // forcing color random for now
     color = random(0, 255);
     EVERY_N_MILLISECONDS(200)
     {
-        for (int i = 0; i < ledNum; i++)
+        for (int i = 0; i < LED_COUNT; i++)
         {
-            leds[i] = CHSV(color, 255, 180);
+            leds[i] = CHSV(color, 255, 255);
         }
         FastLED.show();
-        delay(10);
-        FastLED.clear();
-        FastLED.show();
     }
+    FastLED.clear();
+    FastLED.show();
+    return;
 }
 
-void ltrDot(CRGB leds[], int gTransform[], int ledNum)
+void ltrDot(CRGB leds[], int gTransform[])
 {
     static int ledIndex;
     static uint8_t randomColor;
@@ -140,8 +154,8 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 
         leds[gTransform[ledIndex]] = CHSV(randomColor, 255, 200);
         FastLED.show();
-        ledIndex += 3;
-        if (ledIndex >= ledNum)
+        ledIndex++;
+        if (ledIndex == LED_COUNT)
         {
             ledIndex = 0;
         }
@@ -149,39 +163,142 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 
     EVERY_N_MILLISECONDS(2)
     {
-        fadeToBlackBy(leds, ledNum, 30);
+        fadeToBlackBy(leds, LED_COUNT, 30);
     }
 
     if (ledIndex == 0)
         randomColor = random(0, 255);
 }
 
-/*--------------------------------------------------------------------
-                         Utility functions
----------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------
-    Order Tranpose - Most matrixes are in a psuedo column-major order:
-
-    0 15 16 31.....................................................
-    1 14 17 30.....................................................
-    2 13 18 29.....................................................
-    3 12 19 28.....................................................
-    4 11 20 27.....................................................
-    5 10 21 26.....................................................
-    6 09 22 25.....................................................
-    7 08 23 24.....................................................
-
-    This function transposes an int *array() of pixel locations 
-    to a row-major order. Pass rows=1 if this is a strip instead 
-    of a matrix. 
----------------------------------------------------------------------*/
-
-int *getLtrTransform(int leds[], int ledNum, int rows, int cols)
+void modMation(CRGB leds[])
 {
-    if (rows == 1)
+    EVERY_N_MILLISECONDS(100) // <-- not really needed.
     {
-        for (int i = 0; i < ledNum; i++)
+        for (int i = 0; i < LED_COUNT; i += 8)
+        {
+            leds[i] = CHSV(50, 255, 200);
+            FastLED.show();
+            delay(50);
+            FastLED.clear();
+        }
+
+        for (int i = LED_COUNT; i > 0; i -= 6)
+        {
+            leds[i] = CHSV(130, 255, 200);
+            FastLED.show();
+            delay(50);
+            FastLED.clear();
+        }
+
+        for (int i = 0; i < LED_COUNT; i += 4)
+        {
+            leds[i] = CHSV(180, 255, 200);
+            FastLED.show();
+            delay(50);
+            FastLED.clear();
+        }
+
+        for (int i = LED_COUNT; i > 0; i -= 3)
+        {
+            leds[i] = CHSV(200, 255, 200);
+            FastLED.show();
+            delay(50);
+            FastLED.clear();
+        }
+
+        for (int i = 0; i < LED_COUNT; i += 2)
+        {
+            leds[i] = CHSV(240, 255, 200);
+            FastLED.show();
+            delay(50);
+            fadeToBlackBy(leds, LED_COUNT, 50);
+        }
+
+        for (int i = 0; i < LED_COUNT; i++)
+        {
+            leds[i] = CHSV(0, 255, 200);
+            FastLED.show();
+            delay(50);
+            fadeToBlackBy(leds, LED_COUNT, 70);
+        }
+        FastLED.clear();
+    }
+}
+
+// ---------------------------------------------------
+//  FastLED Built-in Effects
+// ---------------------------------------------------
+
+void rainbow(CRGB leds[])
+{
+  // FastLED's built-in rainbow generator
+  fill_rainbow(leds, LED_COUNT, gHue, 7);
+}
+
+void rainbowWithGlitter(CRGB leds[])
+{
+  // built-in FastLED rainbow, plus some random sparkly glitter
+  rainbow(leds);
+  addGlitter(leds, 80);
+}
+
+void addGlitter(CRGB leds[], fract8 chanceOfGlitter)
+{
+  if ( random8() < chanceOfGlitter) {
+    leds[ random16(LED_COUNT) ] += CRGB::White;
+  }
+}
+
+void confetti(CRGB leds[])
+{
+  // random colored speckles that blink in and fade smoothly
+  fadeToBlackBy( leds, LED_COUNT, 10);
+  int pos = random16(LED_COUNT);
+  leds[pos] += CHSV( gHue + random8(64), 200, 255);
+}
+
+void sinelon(CRGB leds[])
+{
+  // a colored dot sweeping back and forth, with fading trails
+  fadeToBlackBy( leds, LED_COUNT, 20);
+  int pos = beatsin16(13, 0, LED_COUNT);
+  leds[pos] += CHSV( gHue, 255, 192);
+}
+
+void bpm(CRGB leds[])
+{
+  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+  uint8_t BeatsPerMinute = 62;
+  CRGBPalette16 palette = PartyColors_p;
+  uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
+  for ( int i = 0; i < LED_COUNT; i++) { //9948
+    leds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
+  }
+}
+
+void juggle(CRGB leds[]) {
+  // eight colored dots, weaving in and out of sync with each other
+  fadeToBlackBy( leds, LED_COUNT, 20);
+  byte dothue = 0;
+  for ( int i = 0; i < 8; i++) {
+    leds[beatsin16(i + 7, 0, LED_COUNT)] |= CHSV(dothue, 200, 255);
+    dothue += 32;
+  }
+}
+
+// ---------------------------------------------------
+// Utility functions
+// ---------------------------------------------------
+
+// LTR Transform - Returns an int *array() of pixel locations mapped left to right
+int *getLtrTransform(int leds[], int rows, int cols)
+{
+
+    // If rows and cols are not set then this is a strip, not a matrix.
+    // So, populate the array with the default 1...255 and return.
+    if (rows == 0 || cols == 0)
+    {
+        for (int i = 0; i < LED_COUNT; i++)
         {
             leds[i] = i;
         }
@@ -195,7 +312,7 @@ int *getLtrTransform(int leds[], int ledNum, int rows, int cols)
     int cRow = 0;
     int mappedVal = -1;
 
-    for (int i = 0; i < ledNum; i++)
+    for (int i = 0; i < LED_COUNT; i++)
     {
         if (cCol < cols)
         {
