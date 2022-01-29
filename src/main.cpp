@@ -48,11 +48,11 @@
 #include <oled.h>
 
 // LED Matric Config - 256x8 Matrix
-const int DATA_PIN = 15;
-const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
-const int NUM_LEDS = 256;
-const int NUM_ROWS = 16;
-const int NUM_COLS = 16;
+// Set NUM_ROWS=1 for a single row strip.
+const int DATA_PIN = 5;
+const int NUM_LEDS = 280;
+const int NUM_ROWS = 1;
+const int NUM_COLS = 0;
 
 // LED Matric Config- 8 LED Strip
 // const int DATA_PIN = 5;
@@ -97,8 +97,6 @@ void setup()
     Serial.println();
     Serial.println("Booting...");
     zUtils::getChipInfo();
-    pinMode(PWR_PIN, OUTPUT);
-    digitalWrite(PWR_PIN, HIGH);
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
 
@@ -122,7 +120,7 @@ void setup()
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
 
-    // Reamap pixels to matrix, call this now if using a matrix
+    // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
 
 }

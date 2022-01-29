@@ -153,16 +153,30 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 
 }
 
-// ---------------------------------------------------
-// Utility functions
-// ---------------------------------------------------
+/*--------------------------------------------------------------------
+                         Utility functions
+---------------------------------------------------------------------*/
 
-// LTR Transform - Returns an int *array() of pixel locations mapped left to right
-int * getLtrTransform(int leds[], int ledNum, int rows=0, int cols=0){
+/*--------------------------------------------------------------------
+    Order Tranpose - Most matrixes are in a psuedo column-major order:
 
-    // If rows and cols are not set then this is a strip, not a matrix.
-    // So, populate the array with the default 1...255 and return.
-    if(rows==0 || cols==0){
+    0 15 16 31.....................................................
+    1 14 17 30.....................................................
+    2 13 18 29.....................................................
+    3 12 19 28.....................................................
+    4 11 20 27.....................................................
+    5 10 21 26.....................................................
+    6 09 22 25.....................................................
+    7 08 23 24.....................................................
+
+    This function transposes an int *array() of pixel locations 
+    to a row-major order. Pass rows=1 if this is a strip instead 
+    of a matrix. 
+---------------------------------------------------------------------*/
+
+int * getLtrTransform(int leds[], int ledNum, int rows, int cols){
+
+    if(rows==1){
         for(int i=0; i<ledNum; i++){
             leds[i] = i;
         }
