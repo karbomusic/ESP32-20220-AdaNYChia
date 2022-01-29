@@ -28,11 +28,11 @@ void clearLeds()
 }
 
 // prototypes
-int * getLtrTransform(int leds[], int ledNum, int rows=0, int cols=0);
+int *getLtrTransform(int leds[], int ledNum, int rows = 0, int cols = 0);
 
 void randomDots2(CRGB leds[], int ledNum)
 {
-    currentLEDNum = random(ledNum);
+    currentLEDNum = random(ledNum - 1);
     sLED currentLED;
     currentLED.index = currentLEDNum;
     currentLED.H = random(255);
@@ -50,7 +50,7 @@ void randomDots2(CRGB leds[], int ledNum)
 
 void randomDots(CRGB leds[], int ledNum)
 {
-    currentLEDNum = random(ledNum);
+    currentLEDNum = random(ledNum - 1);
     sLED currentLED;
     currentLED.index = currentLEDNum;
     currentLED.H = random(255);
@@ -59,6 +59,7 @@ void randomDots(CRGB leds[], int ledNum)
     leds[currentLEDNum] = CHSV(currentLED.H, currentLED.S, currentLED.V);
     FastLED.show();
     leds[currentLED.index] = CHSV(0, 0, 0);
+    FastLED.clear();
 }
 
 void randomNoise(CRGB leds[], int ledNum)
@@ -98,13 +99,16 @@ void randomBlueJumper(CRGB leds[], int ledNum)
 
 void dotScrollRandomColor(CRGB leds[], int ledNum)
 {
-    for (int i = 0; i < ledNum; i++)
+    for (int i = 0; i < ledNum; i += 3)
     {
-        leds[i] = CHSV(random(0, 255), 255, 150);
-        leds[random(ledNum)] = CHSV(128, 150, 100);
-        FastLED.show();
-        delay(22);
-        FastLED.clear();
+        if (i < ledNum) // cuz 3
+        {
+            leds[i] = CHSV(random(0, 255), 255, 150);
+            leds[random(ledNum)] = CHSV(128, 150, 100);
+            FastLED.show();
+            delay(22);
+            FastLED.clear();
+        }
     }
     return;
 }
@@ -117,40 +121,39 @@ void flashColor(CRGB leds[], int ledNum, int color)
     {
         for (int i = 0; i < ledNum; i++)
         {
-            leds[i] = CHSV(color, 255, 255);
+            leds[i] = CHSV(color, 255, 180);
         }
         FastLED.show();
+        delay(10);
+        FastLED.clear();
+        FastLED.show();
     }
-    FastLED.clear();
-    FastLED.show();
-    return;
 }
 
 void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 {
     static int ledIndex;
     static uint8_t randomColor;
-   
-    EVERY_N_MILLISECONDS(30){
-       
-        leds[gTransform[ledIndex]] = CHSV(randomColor,255,200);
+
+    EVERY_N_MILLISECONDS(30)
+    {
+
+        leds[gTransform[ledIndex]] = CHSV(randomColor, 255, 200);
         FastLED.show();
-        ledIndex++;
-        if(ledIndex==ledNum)
+        ledIndex += 3;
+        if (ledIndex >= ledNum)
         {
             ledIndex = 0;
         }
-       
     }
 
     EVERY_N_MILLISECONDS(2)
     {
-         fadeToBlackBy(leds, ledNum, 30);
+        fadeToBlackBy(leds, ledNum, 30);
     }
 
-    if(ledIndex==0)
-        randomColor = random(0,255);
-
+    if (ledIndex == 0)
+        randomColor = random(0, 255);
 }
 
 /*--------------------------------------------------------------------
@@ -174,10 +177,12 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
     of a matrix. 
 ---------------------------------------------------------------------*/
 
-int * getLtrTransform(int leds[], int ledNum, int rows, int cols){
-
-    if(rows==1){
-        for(int i=0; i<ledNum; i++){
+int *getLtrTransform(int leds[], int ledNum, int rows, int cols)
+{
+    if (rows == 1)
+    {
+        for (int i = 0; i < ledNum; i++)
+        {
             leds[i] = i;
         }
         return leds;
@@ -190,23 +195,23 @@ int * getLtrTransform(int leds[], int ledNum, int rows, int cols){
     int cRow = 0;
     int mappedVal = -1;
 
-        for (int i = 0; i < ledNum; i++)
+    for (int i = 0; i < ledNum; i++)
+    {
+        if (cCol < cols)
         {
-            if (cCol < cols)
-            {
-                mappedVal = (!modVal ? mappedVal + bigHop : mappedVal + smallHop);
-            }
-            else
-            {
-                cRow = cRow == rows ? 0 : cRow += 1;
-                cCol = 0;
-                mappedVal = cRow + cCol;
-                bigHop -= 2;
-                smallHop += 2;
-            }
-            modVal = !modVal;
-            cCol++;
-            leds[i] = mappedVal;
+            mappedVal = (!modVal ? mappedVal + bigHop : mappedVal + smallHop);
         }
+        else
+        {
+            cRow = cRow == rows ? 0 : cRow += 1;
+            cCol = 0;
+            mappedVal = cRow + cCol;
+            bigHop -= 2;
+            smallHop += 2;
+        }
+        modVal = !modVal;
+        cCol++;
+        leds[i] = mappedVal;
+    }
     return leds;
 }

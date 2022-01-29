@@ -50,7 +50,7 @@
 // LED Matric Config - 256x8 Matrix
 // Set NUM_ROWS=1 for a single row strip.
 const int DATA_PIN = 5;
-const int NUM_LEDS = 280;
+const int NUM_LEDS = 265;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
 
@@ -114,7 +114,7 @@ void setup()
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 5000);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1500);
     FastLED.setBrightness(255);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
@@ -122,7 +122,6 @@ void setup()
 
     // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
-
 }
 
 void printDisplayMessage(String msg)
@@ -137,7 +136,6 @@ void printDisplayMessage(String msg)
 
 void loop()
 {
-
     /*--------------------------------------------------------------------
         Update oled every second with your text
     ---------------------------------------------------------------------*/
@@ -223,7 +221,7 @@ void loop()
 
 /*--------------------------------------------------------------------
      Project specific utility code (otherwise use zUtils.h)
-    ---------------------------------------------------------------------*/
+---------------------------------------------------------------------*/
 String checkSPIFFS()
 {
     // SPIFFs support
