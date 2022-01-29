@@ -103,7 +103,7 @@ void dotScrollRandomColor(CRGB leds[], int ledNum)
     {
         if (i < ledNum) // cuz 3
         {
-            leds[i] = CHSV(random(0, 255), 255, 150);
+            leds[i] = CHSV(random(0, 255), 255, 255);
             leds[random(ledNum)] = CHSV(128, 150, 100);
             FastLED.show();
             delay(22);
@@ -121,7 +121,7 @@ void flashColor(CRGB leds[], int ledNum, int color)
     {
         for (int i = 0; i < ledNum; i++)
         {
-            leds[i] = CHSV(color, 255, 180);
+            leds[i] = CHSV(color, 255, 255);
         }
         FastLED.show();
         delay(10);
@@ -138,7 +138,7 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
     EVERY_N_MILLISECONDS(30)
     {
 
-        leds[gTransform[ledIndex]] = CHSV(randomColor, 255, 200);
+        leds[gTransform[ledIndex]] = CHSV(randomColor, 255, 255);
         FastLED.show();
         ledIndex += 3;
         if (ledIndex >= ledNum)
@@ -161,25 +161,26 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 ---------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------
-    Order Tranpose - Most matrixes are in a psuedo column-major order:
+    Transpose Pixels - Some layouts are psuedo column-major order:
 
-    0 15 16 31.....................................................
-    1 14 17 30.....................................................
-    2 13 18 29.....................................................
-    3 12 19 28.....................................................
-    4 11 20 27.....................................................
-    5 10 21 26.....................................................
-    6 09 22 25.....................................................
-    7 08 23 24.....................................................
+    0 15 16 31..................................................255
+    1 14 17 30..................................................254
+    2 13 18 29..................................................253
+    3 12 19 28..................................................252
+    4 11 20 27..................................................251
+    5 10 21 26..................................................250
+    6 09 22 25..................................................249
+    7 08 23 24..................................................248
 
-    This function transposes an int *array() of pixel locations 
-    to a row-major order. Pass rows=1 if this is a strip instead 
+    This function transposes such an int *array() of pixels to
+    a row-major order. Pass rows=1 if this is a strip instead 
     of a matrix. 
 ---------------------------------------------------------------------*/
 
 int *getLtrTransform(int leds[], int ledNum, int rows, int cols)
 {
-    if (rows == 1)
+    // LED Strip
+    if (rows == 1) 
     {
         for (int i = 0; i < ledNum; i++)
         {
@@ -188,6 +189,7 @@ int *getLtrTransform(int leds[], int ledNum, int rows, int cols)
         return leds;
     }
 
+    // LED Matrix
     bool modVal = true;
     int bigHop = (rows * 2) - 1;
     int smallHop = 1;
