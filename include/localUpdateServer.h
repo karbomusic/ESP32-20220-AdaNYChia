@@ -124,6 +124,12 @@ void startUpdateServer()
                       requestValue = 8;
                       currentAnimation = "LeftToRight";
                   });
+    httpServer.on("/9", HTTP_GET, []()
+                  {
+                      httpServer.send(200, "text/plain", "Mod Motion");
+                      requestValue = 9;
+                      currentAnimation = "ModMotion";
+                  });
 
     httpServer.onNotFound([]()
                           {

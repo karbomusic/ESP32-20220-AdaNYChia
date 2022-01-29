@@ -28,7 +28,7 @@ void clearLeds()
 }
 
 // prototypes
-int * getLtrTransform(int leds[], int ledNum, int rows=0, int cols=0);
+int *getLtrTransform(int leds[], int ledNum, int rows = 0, int cols = 0);
 
 void randomDots2(CRGB leds[], int ledNum)
 {
@@ -130,27 +130,81 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 {
     static int ledIndex;
     static uint8_t randomColor;
-   
-    EVERY_N_MILLISECONDS(30){
-       
-        leds[gTransform[ledIndex]] = CHSV(randomColor,255,200);
+
+    EVERY_N_MILLISECONDS(30)
+    {
+
+        leds[gTransform[ledIndex]] = CHSV(randomColor, 255, 200);
         FastLED.show();
         ledIndex++;
-        if(ledIndex==ledNum)
+        if (ledIndex == ledNum)
         {
             ledIndex = 0;
         }
-       
     }
 
     EVERY_N_MILLISECONDS(2)
     {
-         fadeToBlackBy(leds, ledNum, 30);
+        fadeToBlackBy(leds, ledNum, 30);
     }
 
-    if(ledIndex==0)
-        randomColor = random(0,255);
+    if (ledIndex == 0)
+        randomColor = random(0, 255);
+}
 
+void modMation(CRGB leds[], int ledNum)
+{
+    EVERY_N_MILLISECONDS(100) // <-- not really needed.
+    {
+        for (int i = 0; i < ledNum; i += 8)
+        {
+            leds[i] = CHSV(50, 255, 200);
+            FastLED.show();
+            delay(50);
+            FastLED.clear();
+        }
+
+        for (int i = ledNum; i > 0; i -= 6)
+        {
+            leds[i] = CHSV(130, 255, 200);
+            FastLED.show();
+            delay(50);
+            FastLED.clear();
+        }
+
+        for (int i = 0; i < ledNum; i += 4)
+        {
+            leds[i] = CHSV(180, 255, 200);
+            FastLED.show();
+            delay(50);
+            FastLED.clear();
+        }
+
+        for (int i = ledNum; i > 0; i -= 3)
+        {
+            leds[i] = CHSV(200, 255, 200);
+            FastLED.show();
+            delay(50);
+            FastLED.clear();
+        }
+
+        for (int i = 0; i < ledNum; i += 2)
+        {
+            leds[i] = CHSV(240, 255, 200);
+            FastLED.show();
+            delay(50);
+            fadeToBlackBy(leds, ledNum, 50);
+        }
+
+        for (int i = 0; i < ledNum; i++)
+        {
+            leds[i] = CHSV(0, 255, 200);
+            FastLED.show();
+            delay(50);
+            fadeToBlackBy(leds, ledNum, 70);
+        }
+        FastLED.clear();
+    }
 }
 
 // ---------------------------------------------------
@@ -158,12 +212,15 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 // ---------------------------------------------------
 
 // LTR Transform - Returns an int *array() of pixel locations mapped left to right
-int * getLtrTransform(int leds[], int ledNum, int rows=0, int cols=0){
+int *getLtrTransform(int leds[], int ledNum, int rows, int cols)
+{
 
     // If rows and cols are not set then this is a strip, not a matrix.
     // So, populate the array with the default 1...255 and return.
-    if(rows==0 || cols==0){
-        for(int i=0; i<ledNum; i++){
+    if (rows == 0 || cols == 0)
+    {
+        for (int i = 0; i < ledNum; i++)
+        {
             leds[i] = i;
         }
         return leds;
@@ -176,23 +233,23 @@ int * getLtrTransform(int leds[], int ledNum, int rows=0, int cols=0){
     int cRow = 0;
     int mappedVal = -1;
 
-        for (int i = 0; i < ledNum; i++)
+    for (int i = 0; i < ledNum; i++)
+    {
+        if (cCol < cols)
         {
-            if (cCol < cols)
-            {
-                mappedVal = (!modVal ? mappedVal + bigHop : mappedVal + smallHop);
-            }
-            else
-            {
-                cRow = cRow == rows ? 0 : cRow += 1;
-                cCol = 0;
-                mappedVal = cRow + cCol;
-                bigHop -= 2;
-                smallHop += 2;
-            }
-            modVal = !modVal;
-            cCol++;
-            leds[i] = mappedVal;
+            mappedVal = (!modVal ? mappedVal + bigHop : mappedVal + smallHop);
         }
+        else
+        {
+            cRow = cRow == rows ? 0 : cRow += 1;
+            cCol = 0;
+            mappedVal = cRow + cCol;
+            bigHop -= 2;
+            smallHop += 2;
+        }
+        modVal = !modVal;
+        cCol++;
+        leds[i] = mappedVal;
+    }
     return leds;
 }

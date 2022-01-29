@@ -45,27 +45,26 @@
 #include <Kanimations.h>
 #include <localUpdateServer.h>
 #include <FastLED.h>
-#include <oled.h>
 
 // LED Matric Config - 256x8 Matrix
-const int DATA_PIN = 15;
-const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
-const int NUM_LEDS = 256;
-const int NUM_ROWS = 16;
-const int NUM_COLS = 16;
+// const int DATA_PIN = 15;
+// const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
+// const int NUM_LEDS = 256;
+// const int NUM_ROWS = 16;
+// const int NUM_COLS = 16;
 
 // LED Matric Config- 8 LED Strip
-// const int DATA_PIN = 5;
-// const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
-// const int NUM_LEDS = 8;
-// const int NUM_ROWS = 0;
-// const int NUM_COLS = 32;
+const int DATA_PIN = 5;
+const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
+const int NUM_LEDS = 24;
+const int NUM_ROWS = 0;
+const int NUM_COLS = 0;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
 
 // externs
-extern Adafruit_SSD1306 display;
+//extern Adafruit_SSD1306 display;
 extern WebServer httpServer;
 extern void startWifi();
 extern void startUpdateServer();
@@ -92,8 +91,8 @@ void setup()
      Boot, Oled and I/O initialization.
     ---------------------------------------------------------------------*/
     Serial.begin(115200);
-    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
-    printDisplayMessage("Boot...");
+    // display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
+    // printDisplayMessage("Boot...");
     Serial.println();
     Serial.println("Booting...");
     zUtils::getChipInfo();
@@ -105,11 +104,11 @@ void setup()
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
     ---------------------------------------------------------------------*/
-    printDisplayMessage("Wifi...");
+    //printDisplayMessage("Wifi...");
     startWifi();
-    printDisplayMessage("SPIFFS..");
+    //  printDisplayMessage("SPIFFS..");
     checkSPIFFS();
-    printDisplayMessage("Server...");
+    // printDisplayMessage("Server...");
     startUpdateServer();
 
     /*--------------------------------------------------------------------
@@ -124,18 +123,17 @@ void setup()
 
     // Reamap pixels to matrix, call this now if using a matrix
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
-
 }
 
-void printDisplayMessage(String msg)
-{
-    display.clearDisplay();
-    display.setTextSize(2);
-    display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    display.println(msg);
-    display.display();
-}
+// void printDisplayMessage(String msg)
+// {
+//     display.clearDisplay();
+//     display.setTextSize(2);
+//     display.setTextColor(WHITE);
+//     display.setCursor(0, 0);
+//     display.println(msg);
+//     display.display();
+// }
 
 void loop()
 {
@@ -143,22 +141,22 @@ void loop()
     /*--------------------------------------------------------------------
         Update oled every second with your text
     ---------------------------------------------------------------------*/
-    if (millis() - lastUpdate > 1000)
-    {
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-        display.setCursor(0, 0);
-        display.println(globalIP);
-        display.setCursor(0, 9);
-        display.println("Up: " + zUtils::getMidTime());
-        display.setCursor(0, 17);
-        display.println("Signal: " + String(WiFi.RSSI()) + " dBm");
-        display.setCursor(0, 25);
-        display.println(currentAnimation);
-        display.display();
-        lastUpdate = millis();
-    }
+    // if (millis() - lastUpdate > 1000)
+    // {
+    //     display.clearDisplay();
+    //     display.setTextSize(1);
+    //     display.setTextColor(WHITE);
+    //     display.setCursor(0, 0);
+    //     display.println(globalIP);
+    //     display.setCursor(0, 9);
+    //     display.println("Up: " + zUtils::getMidTime());
+    //     display.setCursor(0, 17);
+    //     display.println("Signal: " + String(WiFi.RSSI()) + " dBm");
+    //     display.setCursor(0, 25);
+    //     display.println(currentAnimation);
+    //     display.display();
+    //     lastUpdate = millis();
+    // }
     /*--------------------------------------------------------------------
      Project specific loop code
     ---------------------------------------------------------------------*/
@@ -175,6 +173,8 @@ void loop()
 
     EVERY_N_MILLISECONDS(10) // check requestValue from localWebServer and choose animation or brightness
     {
+
+        requestValue = 9;
 
         switch (requestValue)
         {
@@ -212,6 +212,10 @@ void loop()
 
         case 8:
             ltrDot(leds, gLeds, NUM_LEDS);
+            break;
+
+        case 9:
+            modMation(leds, NUM_LEDS);
             break;
         }
     }
