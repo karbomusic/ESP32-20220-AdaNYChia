@@ -19,10 +19,7 @@
             
   Config:    You must update secrets.h with your WiFi credentials
              and the hostname you choose for this device.
-             SPIFFs for HTML requires index.html and update.html to be uploaded first.
-             Place files in /data then VSCode > View > PlatformIO > UploadFilsystemImage
-             Or via Arduino plugin:
-             https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/
+             Currently using Elegant OTA.
 
   Building:  pio run -t <target> -e envName
 
@@ -43,32 +40,32 @@
 #include <zUtils.h>
 #include <localWiFi.h>
 #include <Kanimations.h>
-#include <localUpdateServer.h>
+#include <asyncWebServer.h>
 #include <FastLED.h>
 #include <oled.h>
 
-// LED Matric Config - 256x8 Matrix
-// Set NUM_ROWS=1 for a single row strip.
+/*-------------------------------------------------------------------
+
+Pre-deloyment configuration
+
+1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
+2. Set <title> in htmlStrings.h
+3. Set power max in main.cpp below (must match PSU used!).
+4. set hostName in secrets.h
+5. set ssid and password in secrets.h
+-------------------------------------------------------------------*/
 const int DATA_PIN = 5;
-const int NUM_LEDS = 24;
+const int NUM_LEDS = 265;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-
-// LED Matric Config- 8 LED Strip
-// const int DATA_PIN = 5;
-// const int PWR_PIN = 23; //  not always needed but is 3v3 volts.
-// const int NUM_LEDS = 8;
-// const int NUM_ROWS = 0;
-// const int NUM_COLS = 32;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
 
 // externs
 extern Adafruit_SSD1306 display;
-extern WebServer httpServer;
 extern void startWifi();
-extern void startUpdateServer();
+extern void startWebServer();
 extern bool isWiFiConnected();
 extern String globalIP;
 extern int g_lineHeight;
@@ -105,16 +102,17 @@ void setup()
     ---------------------------------------------------------------------*/
     printDisplayMessage("Wifi...");
     startWifi();
-    printDisplayMessage("SPIFFS..");
-    checkSPIFFS();
+    //printDisplayMessage("SPIFFS..");
+    //checkSPIFFS();
     printDisplayMessage("Server...");
-    startUpdateServer();
+    //startUpdateServer();
+    startWebServer();
 
     /*--------------------------------------------------------------------
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 5000);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1800);
     FastLED.setBrightness(255);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
@@ -215,8 +213,8 @@ void loop()
     /*--------------------------------------------------------------------
      Required for web server and OTA updates
     ---------------------------------------------------------------------*/
-    httpServer.handleClient();
-    delay(1);
+    // httpServer.handleClient();
+    // delay(1);
 }
 
 /*--------------------------------------------------------------------
