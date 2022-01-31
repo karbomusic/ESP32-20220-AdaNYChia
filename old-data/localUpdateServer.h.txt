@@ -46,7 +46,6 @@ void startUpdateServer()
     // listAllFiles();
     updateHtml = getUpdateHTML();
     controlPanelHtml = getControlPanelHTML();
-    Serial.println("mDNS responder started");
 
     // handlers for url paths
     httpServer.on("/", HTTP_GET, []()
@@ -212,7 +211,9 @@ void handleAbout()
                            String(ESP.getFreeHeap()) + "<br>"
                                                        "<b>Flash Mem Size:</b> " +
                            String(ESP.getFlashChipSize() / 1024 / 1024) + " MB<br>"
-                                                                          "<b>Hostname:</b> " +
+                                                        "<b>Chip ID: </b>" +
+                           String(zUtils::getChipID()) + "<br>"
+                                                        "<b>Hostname:</b> " +
                            hostName + "<br>"
                                       "<b>IPAddress:</b> " +
                            globalIP + "<br>"

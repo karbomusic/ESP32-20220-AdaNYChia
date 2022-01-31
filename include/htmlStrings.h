@@ -1,12 +1,26 @@
+/*+===================================================================
+  File:      strings.h
+
+  Summary:   A place for strings.   
+             
+  Kary Wall 2022.
+===================================================================+*/
+
+#include <Arduino.h>
+
+// Post restart redirect
+const String metaRedirect ="<html><head><meta http-equiv=\"refresh\"content=\"10;url=/about\"/></head><body>"
+                           "Restarting in 5 seconds...<br>Returning to about page in 20 seconds.</body></html>";
+
+// control panel
+const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ledman!</title>
-    <!-- <link href="styles.css" type="text/css" rel="stylesheet"> -->
+    <title>LEDMan</title>
     <script type=text/javascript>
         function makeHttpObject()  {
             try { return new XMLHttpRequest(); }
@@ -16,20 +30,20 @@
             try { return new ActiveXObject("Microsoft.XMLHTTP"); }
             catch (error) { } 
         }
-        function navigate(value){
-                var request = makeHttpObject();
-                console.log(this.document.location + value);
-                request.open("GET", this.document.location + value, false);
-                request.send();
+
+        function setAnimation(value){
+            console.log("animation=" + value);
+            var request = makeHttpObject();
+            request.open("GET", '?animation=' + value, false);
+            request.send();
         }
 
-        function slide(bValue){
+        function setBrightness(bValue){
             document.getElementById("briteval").innerHTML = bValue;
             var request = makeHttpObject();
             request.open("GET", '?brite=' + bValue, false);
             request.send();
         }
-
     </script>
     <style>
         body {
@@ -41,7 +55,7 @@
         .center {
             margin-left: auto;
             margin-right: auto;
-            width:200px;
+            width: 200px;
         }
 
         .slidecontainer {
@@ -49,9 +63,8 @@
             margin-left: auto;
             margin-right: auto;
             border-radius: 5px;
-            text-align:center;
+            text-align: center;
         }
-
 
         .slider {
             -webkit-appearance: none;
@@ -123,34 +136,27 @@
         }
     </style>
 </head>
-
 <body>
     <div>
-        <h1 style="text-align: center;">Studio LED Matrix</h1>
+        <h1 style="text-align: center;">Studio Floor Matrix</h1>
         <br>
-        <div class="center"><button class="button" onclick="navigate('1')">Random Dots</button></div>
-        <div class="center"><button class="button" onclick="navigate('2')">Random Dots 2</button></div>
-        <div class="center"><button class="button" onclick="navigate('3')">Noise</button></div>
-        <div class="center"><button class="button" onclick="navigate('4')">Blue Jumper</button></div>
-        <div class="center"><button class="button" onclick="navigate('5')">Purple Jumper</button></div>
-        <div class="center"><button class="button" onclick="navigate('6')">Scroll Color</button></div>
-        <div class="center"><button class="button" onclick="navigate('7')">Flash Color</button></div>
-        <div class="center"><button class="button" onclick="navigate('8')">Left to Right</button></div>
-        <div class="center"><button class="button" onclick="navigate('')">Off</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('1')">Random Dots</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('2')">Random Dots 2</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('3')">Noise</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('4')">Blue Jumper</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('5')">Purple Jumper</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('7')">Flash Color</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('8')">Left to Right</button></div>
+        <div class="center"><button class="button" onclick="setAnimation('')">Off</button></div>
         <br>
         <div class="slidecontainer">
-            <input type="range" onchange="slide(this.value)"  min="15" max="255" value="255" class="slider" id="bSlider">
+            <input type="range" onchange="setBrightness(this.value)" min="15" max="255" value="255" class="slider" id="bSlider">
             <span id="briteval">Brightness</span>
         </div>
-        <!-- <div class="center">
-            <button class="smallButton" onclick="navigate('10')">10%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('20')">20%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('40')">40%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('60')">60%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('80')">80%</button>&nbsp;
-            <button class="smallButton" onclick="navigate('100')">100%</button>
-        </div> -->
     </div>
 </body>
-
 </html>
+)rawliteral";
+
+

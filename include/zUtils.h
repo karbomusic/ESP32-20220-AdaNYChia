@@ -66,6 +66,12 @@ namespace zUtils
         Serial.println("CPU Frequency: " + String(ESP.getCpuFreqMHz()));
         Serial.println("Free Heap Mem: " + String(ESP.getFreeHeap()));
         Serial.println("Flash Mem Size: " + String(ESP.getFlashChipSize() / 1024 / 1024));
+        Serial.println("Chip ID:" + String((uint32_t)ESP.getEfuseMac(), HEX));
+    }
+
+   String getChipID()
+    {
+        return String((uint32_t)ESP.getEfuseMac(), HEX);
     }
 
 }
