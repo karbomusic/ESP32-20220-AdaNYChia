@@ -54,8 +54,8 @@ Pre-deloyment configuration
 4. set hostName in secrets.h
 5. set ssid and password in secrets.h
 -------------------------------------------------------------------*/
-const int DATA_PIN = 5;
-const int NUM_LEDS = 265;
+const int DATA_PIN = 22;
+const int NUM_LEDS = 8;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
 
@@ -70,6 +70,7 @@ extern bool isWiFiConnected();
 extern String globalIP;
 extern int g_lineHeight;
 extern int requestValue;
+extern CHSV chsvValue;
 extern uint8_t briteValue;
 extern bool isUpdating;
 extern String ssid;
@@ -82,6 +83,7 @@ void printDisplayMessage(String msg);
 // locals
 const int activityLED = 12;
 unsigned long lastUpdate = 0;
+bool isSolidColor = false;
 
 void setup()
 {
@@ -112,7 +114,7 @@ void setup()
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1800);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1500);
     FastLED.setBrightness(255);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
@@ -159,53 +161,81 @@ void loop()
 
     EVERY_N_MILLISECONDS(150)
     {
-        if (briteValue > 0)
+        if (chsvValue != CHSV(0, 0, 0))
+        {
+            requestValue = -1;
+            briteValue = -1;
+            if (!isSolidColor)
+            {
+                FastLED.clear();
+            }
+            for (int i = 0; i < NUM_LEDS; i++)
+            {
+                leds[i] = chsvValue;
+            }
+            FastLED.show();
+            chsvValue = CHSV(0, 0, 0);
+            isSolidColor = true;
+        }
+        else if(briteValue > 0)
         {
             FastLED.setBrightness(briteValue);
             FastLED.show();
-            briteValue = 0;
         }
     }
 
-    EVERY_N_MILLISECONDS(10) // check requestValue from localWebServer and choose animation or brightness
+    EVERY_N_MILLISECONDS(10) // check requestValue from localWebServer and choose animation
     {
 
         switch (requestValue)
         {
+        case -1:
+            // do nothing, it's a solid color
+            break;
+
         case 0:
             clearLeds();
+            isSolidColor = false;
             break;
 
         case 1:
             randomDots(leds, NUM_LEDS);
+            isSolidColor = false;
             break;
 
         case 2:
             randomDots2(leds, NUM_LEDS);
+            isSolidColor = false;
             break;
 
         case 3:
             randomNoise(leds, NUM_LEDS);
+            isSolidColor = false;
             break;
 
         case 4:
             randomBlueJumper(leds, NUM_LEDS);
+            isSolidColor = false;
             break;
 
         case 5:
             randomPurpleJumper(leds, NUM_LEDS);
+            isSolidColor = false;
             break;
 
         case 6:
             dotScrollRandomColor(leds, NUM_LEDS);
+            isSolidColor = false;
             break;
 
         case 7:
             flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
+            isSolidColor = false;
             break;
 
         case 8:
             ltrDot(leds, gLeds, NUM_LEDS);
+            isSolidColor = false;
             break;
         }
     }

@@ -15,10 +15,10 @@
 #define STAPSK "creekvalley124"
 #endif
 
-String ssid = STASSID;                          // WiFi ssid
-String password = STAPSK;                       // WiFi password
-String hostName = "LEDMan-StudioFloor";                // hostname as seen on network
-String softwareVersion = "1.30.22";             // used for OTA updates & about page
-String deviceFamily = "ESP32-ELOTA-Matrix";      // used for OTA updates & about page
-String description = "I'm a led matrix baby.";  // used for about page
+String ssid = STASSID;                         // WiFi ssid
+String password = STAPSK;                      // WiFi password
+String hostName = "LEDManTest";                // hostname as seen on network
+String softwareVersion = "1.30.22";            // used for OTA updates & about page
+String deviceFamily = "ESP32-ELOTA-Matrix";    // used for OTA updates & about page
+String description = "I'm a led matrix baby."; // used for about page
 String globalIP = "";

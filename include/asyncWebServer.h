@@ -37,13 +37,17 @@ String controlPanelHtml;
 
 int requestValue = 0;     // to inform loop which request was made (needs event).
 uint8_t briteValue = 255; // used to inform loop new brightness value.
+CHSV chsvValue(0, 0, 0);  // used to inform loop new solid color value.
+
 const char *currentAnimation = "Server ready...";
 bool isUpdating = false;
 
 // incoming parameters
 const char *ANIMATION_PARAM = "animation";
 const char *BRITE_PARAM = "brite";
-
+const char *HUE_PARAM = "hue";
+const char *SAT_PARAM = "sat";
+const char *BRI_PARAM = "bri";
 
 // Replaces placeholder with section in your web page
 String processor(const String &var)
@@ -62,14 +66,17 @@ void startWebServer()
     Serial.println("mDNS responder started");
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { 
-                  String paramValue;
+              {
+                  String animationValue;
+                  String hueValue;
+                  String satValue;
+                  String briValue;
 
                   // Check incoming parameters
                   if (request->hasParam(ANIMATION_PARAM)) // animation
                   {
-                      paramValue = request->getParam(ANIMATION_PARAM)->value();
-                      uint8_t intVal = atoi(paramValue.c_str());
+                      animationValue = request->getParam(ANIMATION_PARAM)->value();
+                      uint8_t intVal = atoi(animationValue.c_str());
 
                       switch (intVal)
                       {
@@ -114,18 +121,35 @@ void startWebServer()
                           requestValue = 0;
                           break;
                       }
-                        Serial.println("Animation chosen: " + String(currentAnimation) + " (" + String(requestValue) + ")");
-                        request->send(200, "text/plain", "Animation changed to: " + String(currentAnimation));
+                      Serial.println("Animation chosen: " + String(currentAnimation) + " (" + String(requestValue) + ")");
+                      request->send(200, "text/plain", "Animation changed to: " + String(currentAnimation));
                   }
-                  else if (request->hasParam(BRITE_PARAM)) // brightness
+                  else if (request->hasParam(HUE_PARAM) && request->hasParam(SAT_PARAM) && request->hasParam(BRI_PARAM))
                   {
-                      paramValue = request->getParam(BRITE_PARAM)->value();
-                      uint8_t intVal = atoi(paramValue.c_str());
+                      briteValue = -1;
+                      // get the params
+                      hueValue = request->getParam(HUE_PARAM)->value();
+                      satValue = request->getParam(SAT_PARAM)->value();
+                      briValue = request->getParam(BRI_PARAM)->value();
+
+                      // convert to ints
+                      uint8_t intHueVal = atoi(hueValue.c_str());
+                      uint8_t intSatVal = atoi(satValue.c_str());
+                      uint8_t intBriVal = atoi(briValue.c_str());
+
+                      Serial.println(String(intHueVal) + " | " + String(intSatVal) + " | " + String(intBriVal));
+                      chsvValue = CHSV(intHueVal, intSatVal, intBriVal);
+                      request->send(200, "text/plain", "Color: H: " + hueValue + " S: " + satValue + " B: " + briValue);
+                  }
+                  else if (request->hasParam(BRI_PARAM)) // brightness 1.0 was BRITE_PARAM
+                  {
+                      briValue = request->getParam(BRI_PARAM)->value();
+                      uint8_t intVal = atoi(briValue.c_str());
                       if (intVal > 0 && intVal <= 255)
                       {
                           briteValue = intVal;
                       }
-                      request->send(200, "text/plain", "Brightness: " + paramValue);
+                      request->send(200, "text/plain", "Brightness: " + briValue);
                   }
                   else
                   {
@@ -133,7 +157,7 @@ void startWebServer()
                       currentAnimation = "Lights Out";
                       //request->send_P(200, "text/html", index_html, processor);
                       request->send_P(200, "text/html", index_html);
-                     // request->send(200, "text/html", controlPanelHtml) ;
+                      // request->send(200, "text/html", controlPanelHtml) ;
                   }
               });
 
@@ -145,12 +169,12 @@ void startWebServer()
 
     server.onNotFound([](AsyncWebServerRequest *request)
                       { request->send(404, "text/plain", "404 - Not found"); });
-               
+
     AsyncElegantOTA.begin(&server); // Start ElegantOTA
     Serial.println("Update server started! Open your browser and go to http://" + globalIP + "/update");
     Serial.println("or http://" + hostName + "/update");
 
-    server.begin();                 // Start web server
+    server.begin(); // Start web server
     Serial.println("HTTP server started! Open your browser and go to http://" + globalIP);
     Serial.println("or http://" + hostName);
     //listAllFiles();
