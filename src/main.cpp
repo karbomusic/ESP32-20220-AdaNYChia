@@ -51,13 +51,13 @@ Pre-deloyment configuration
 1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
 2. Set <title> in htmlStrings.h
 3. Set power max in main.cpp below (must match PSU used!).
-4. set hostName in secrets.h
-5. set ssid and password in secrets.h
+4. Set hostName in secrets.h
+5. Set ssid and password in secrets.h
 -------------------------------------------------------------------*/
-const int DATA_PIN = 22;
-const int NUM_LEDS = 8;
-const int NUM_ROWS = 1;
-const int NUM_COLS = 0;
+const int DATA_PIN = 15;
+const int NUM_LEDS = 256;
+const int NUM_ROWS = 16;
+const int NUM_COLS = 16;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
@@ -75,6 +75,8 @@ extern uint8_t briteValue;
 extern bool isUpdating;
 extern String ssid;
 extern String rssi;
+extern int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
+extern Mode g_ledMode = Mode::Off;
 
 // prototypes
 String checkSPIFFS();
@@ -84,6 +86,7 @@ void printDisplayMessage(String msg);
 const int activityLED = 12;
 unsigned long lastUpdate = 0;
 bool isSolidColor = false;
+Mode previousMode = Mode::Off;
 
 void setup()
 {
@@ -108,14 +111,15 @@ void setup()
     //checkSPIFFS();
     printDisplayMessage("Server...");
     //startUpdateServer();
+
     startWebServer();
 
     /*--------------------------------------------------------------------
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1500);
-    FastLED.setBrightness(255);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 5000);
+    FastLED.setBrightness(180);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
@@ -158,93 +162,75 @@ void loop()
     /*--------------------------------------------------------------------
      Project specific loop code
     ---------------------------------------------------------------------*/
-
-    EVERY_N_MILLISECONDS(150)
+    EVERY_N_MILLISECONDS(10) // change mode based on user input
     {
-        if (chsvValue != CHSV(0, 0, 0))
+        switch (g_ledMode)
         {
-            requestValue = -1;
-            briteValue = -1;
-            if (!isSolidColor)
+        case Mode::Animation:
+            previousMode = Mode::Animation;
+            switch (requestValue)
             {
-                FastLED.clear();
+            case 0:
+                clearLeds();
+                break;
+
+            case 1:
+                randomDots(leds, NUM_LEDS);
+                break;
+
+            case 2:
+                randomDots2(leds, NUM_LEDS);
+                break;
+
+            case 3:
+                randomNoise(leds, NUM_LEDS);
+                break;
+
+            case 4:
+                randomBlueJumper(leds, NUM_LEDS);
+                break;
+
+            case 5:
+                randomPurpleJumper(leds, NUM_LEDS);
+                break;
+
+            case 6:
+                dotScrollRandomColor(leds, gLeds, NUM_LEDS);
+                break;
+
+            case 7:
+                flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
+                break;
+
+            case 8:
+                ltrDot(leds, gLeds, NUM_LEDS);
+                break;
             }
+            break;
+
+        case Mode::SolidColor:
+            previousMode = Mode::SolidColor;
             for (int i = 0; i < NUM_LEDS; i++)
             {
                 leds[i] = chsvValue;
             }
-            FastLED.show();
-            chsvValue = CHSV(0, 0, 0);
-            isSolidColor = true;
-        }
-        else if(briteValue > 0)
-        {
+            FastLED.show(chsvValue.v);
+            break;
+
+        case Mode::Bright:
+
             FastLED.setBrightness(briteValue);
             FastLED.show();
-        }
-    }
-
-    EVERY_N_MILLISECONDS(10) // check requestValue from localWebServer and choose animation
-    {
-
-        switch (requestValue)
-        {
-        case -1:
-            // do nothing, it's a solid color
+            g_ledMode = previousMode;
             break;
 
-        case 0:
+        case Mode::Off:
             clearLeds();
-            isSolidColor = false;
-            break;
-
-        case 1:
-            randomDots(leds, NUM_LEDS);
-            isSolidColor = false;
-            break;
-
-        case 2:
-            randomDots2(leds, NUM_LEDS);
-            isSolidColor = false;
-            break;
-
-        case 3:
-            randomNoise(leds, NUM_LEDS);
-            isSolidColor = false;
-            break;
-
-        case 4:
-            randomBlueJumper(leds, NUM_LEDS);
-            isSolidColor = false;
-            break;
-
-        case 5:
-            randomPurpleJumper(leds, NUM_LEDS);
-            isSolidColor = false;
-            break;
-
-        case 6:
-            dotScrollRandomColor(leds, NUM_LEDS);
-            isSolidColor = false;
-            break;
-
-        case 7:
-            flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
-            isSolidColor = false;
-            break;
-
-        case 8:
-            ltrDot(leds, gLeds, NUM_LEDS);
-            isSolidColor = false;
             break;
         }
     }
 
-    /*--------------------------------------------------------------------
-     Required for web server and OTA updates
-    ---------------------------------------------------------------------*/
-    // httpServer.handleClient();
-    // delay(1);
+    FastLED.delay(10);
 }
 
 /*--------------------------------------------------------------------

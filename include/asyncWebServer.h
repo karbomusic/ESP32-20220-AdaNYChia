@@ -23,6 +23,7 @@ extern String description;        // used for about page.
 extern String globalIP;           // needed for about page.
 extern const String metaRedirect; // needed for restart redirect.
 extern const int activityLED;
+extern Mode g_ledMode;
 
 AsyncWebServer server(80);
 
@@ -64,6 +65,7 @@ void startWebServer()
 {
     // controlPanelHtml = getControlPanelHTML();
     Serial.println("mDNS responder started");
+    
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
               {
@@ -75,6 +77,7 @@ void startWebServer()
                   // Check incoming parameters
                   if (request->hasParam(ANIMATION_PARAM)) // animation
                   {
+                      g_ledMode = Mode::Animation;
                       animationValue = request->getParam(ANIMATION_PARAM)->value();
                       uint8_t intVal = atoi(animationValue.c_str());
 
@@ -126,7 +129,7 @@ void startWebServer()
                   }
                   else if (request->hasParam(HUE_PARAM) && request->hasParam(SAT_PARAM) && request->hasParam(BRI_PARAM))
                   {
-                      briteValue = -1;
+                      g_ledMode = Mode::SolidColor;
                       // get the params
                       hueValue = request->getParam(HUE_PARAM)->value();
                       satValue = request->getParam(SAT_PARAM)->value();
@@ -143,6 +146,7 @@ void startWebServer()
                   }
                   else if (request->hasParam(BRI_PARAM)) // brightness 1.0 was BRITE_PARAM
                   {
+                      g_ledMode = Mode::Bright;
                       briValue = request->getParam(BRI_PARAM)->value();
                       uint8_t intVal = atoi(briValue.c_str());
                       if (intVal > 0 && intVal <= 255)
@@ -153,6 +157,7 @@ void startWebServer()
                   }
                   else
                   {
+                      g_ledMode = Mode::Off;
                       requestValue = 0; // lights out
                       currentAnimation = "Lights Out";
                       //request->send_P(200, "text/html", index_html, processor);
