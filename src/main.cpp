@@ -54,10 +54,10 @@ Pre-deloyment configuration
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
 -------------------------------------------------------------------*/
-const int DATA_PIN = 15;
-const int NUM_LEDS = 256;
-const int NUM_ROWS = 16;
-const int NUM_COLS = 16;
+const int DATA_PIN = 5;
+const int NUM_LEDS = 265;
+const int NUM_ROWS = 1;
+const int NUM_COLS = 0;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
@@ -87,6 +87,7 @@ const int activityLED = 12;
 unsigned long lastUpdate = 0;
 bool isSolidColor = false;
 Mode previousMode = Mode::Off;
+CHSV previousColor = CHSV(0, 0, 0);
 
 void setup()
 {
@@ -111,20 +112,21 @@ void setup()
     //checkSPIFFS();
     printDisplayMessage("Server...");
     //startUpdateServer();
-
     startWebServer();
 
     /*--------------------------------------------------------------------
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 5000);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 2000);
     FastLED.setBrightness(180);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
 
     // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
+    // When using an anmiation that cares about row order, pass gLeds[]
+    // and leds[] to your animation, then use leds[gLeds[i]]
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
 }
 
@@ -143,7 +145,7 @@ void loop()
     /*--------------------------------------------------------------------
         Update oled every second with your text
     ---------------------------------------------------------------------*/
-    if (millis() - lastUpdate > 1000)
+    EVERY_N_MILLISECONDS(250)
     {
         display.clearDisplay();
         display.setTextSize(1);
@@ -210,15 +212,22 @@ void loop()
 
         case Mode::SolidColor:
             previousMode = Mode::SolidColor;
+            currentAnimation = "Solid Color";
+            // if (chsvValue == previousColor)
+            // {
+            //     return;
+            // }
             for (int i = 0; i < NUM_LEDS; i++)
             {
                 leds[i] = chsvValue;
             }
-            FastLED.show(chsvValue.v);
+            // FastLED.showColor(chsvValue);
+          //  FastLED.show(chsvValue.v);
+            FastLED.show();
+            //previousColor = chsvValue;
             break;
 
         case Mode::Bright:
-
             FastLED.setBrightness(briteValue);
             FastLED.show();
             g_ledMode = previousMode;
@@ -229,8 +238,7 @@ void loop()
             break;
         }
     }
-
-    FastLED.delay(10);
+    // FastLED.delay(10);
 }
 
 /*--------------------------------------------------------------------

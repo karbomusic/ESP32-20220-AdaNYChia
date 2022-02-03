@@ -149,10 +149,11 @@ void startWebServer()
                       g_ledMode = Mode::Bright;
                       briValue = request->getParam(BRI_PARAM)->value();
                       uint8_t intVal = atoi(briValue.c_str());
-                      if (intVal > 0 && intVal <= 255)
+                      if (intVal >= 24 && intVal <= 255) // limit minimum brightness or it will confuse the user
                       {
                           briteValue = intVal;
                       }
+                      Serial.println(String(briteValue));
                       request->send(200, "text/plain", "Brightness: " + briValue);
                   }
                   else
