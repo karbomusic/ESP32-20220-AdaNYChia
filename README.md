@@ -17,7 +17,7 @@ NUM_LEDS = 256
 NUM_ROWS = 8;
 NUM_COLS = 32;
 
-Set rows=0 for LED Strips.
+Set NUM_ROWS=1 for LED Strips.
 
 ===========================================================
 
