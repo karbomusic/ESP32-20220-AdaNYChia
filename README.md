@@ -5,17 +5,17 @@ This is the NYLED ESP32 project adapted for this OLED: https://www.amazon.com/gp
 
 Works with strips and matrixes.  
 
-###OLED
- OLED_WIDTH 128
- OLED_HEIGHT 32
- OLED_ADDR 0x3C
- PINS: SCL=IO22, SCA=IO21 
+###OLED 
+ OLED_WIDTH 128 
+ OLED_HEIGHT 32 
+ OLED_ADDR 0x3C 
+ PINS: SCL=IO22, SCA=IO21  
 
-###MATRIX
-DATA_PIN = IO15
-NUM_LEDS = 256
-NUM_ROWS = 8;
-NUM_COLS = 32;
+###MATRIX 
+DATA_PIN = IO15  
+NUM_LEDS = 256  
+NUM_ROWS = 8  
+NUM_COLS = 32  
 
 Set NUM_ROWS=1 for LED Strips.
 
