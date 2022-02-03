@@ -35,7 +35,7 @@ Set NUM_ROWS=1 for LED Strips.
 
              Pre-deloyment configuration checklist:
              
-                1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
+                1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - NUM_ROWS=1 = single strip.
                 2. Set <title> in htmlStrings.h
                 3. Set power max in main.cpp below (must match PSU used!).
                 4. Set hostName in secrets.h
