@@ -3,23 +3,31 @@
             HTTP Server, WiFi connectivity and About page.
             Only manual OTA updates (/update) are supported.
 
-            This is specifcally for the chinese wide/skinny
+            This is specifcally for the wide/skinny
             oled display as seen in readme.md.
   
   File:      main.cpp
 
   Project:   <yourprojectname>
              
-  Summary:   Project template that includes plubming and code for 
+  Summary:   Project template that includes plumbing and code for 
              a WiFi client + OTA updates via manual update.
              Automatic updates are not yet implemented but
-             may be ported over from my legacy projects.
+             may be ported over from legacy projects.
 
              Architecture: ESP32 specific.
             
   Config:    You must update secrets.h with your WiFi credentials
              and the hostname you choose for this device.
              Currently using Elegant OTA.
+
+             Pre-deloyment configuration checklist:
+             
+                1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
+                2. Set <title> in htmlStrings.h
+                3. Set power max in main.cpp below (must match PSU used!).
+                4. Set hostName in secrets.h
+                5. Set ssid and password in secrets.h
 
   Building:  pio run -t <target> -e envName
 
@@ -54,10 +62,10 @@ Pre-deloyment configuration
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
 -------------------------------------------------------------------*/
-const int DATA_PIN = 5;
-const int NUM_LEDS = 265;
-const int NUM_ROWS = 1;
-const int NUM_COLS = 0;
+const int DATA_PIN = 15;
+const int NUM_LEDS = 256;
+const int NUM_ROWS = 8;
+const int NUM_COLS = 32;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
@@ -118,7 +126,7 @@ void setup()
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 2000);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 8000);
     FastLED.setBrightness(180);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
@@ -213,18 +221,7 @@ void loop()
         case Mode::SolidColor:
             previousMode = Mode::SolidColor;
             currentAnimation = "Solid Color";
-            // if (chsvValue == previousColor)
-            // {
-            //     return;
-            // }
-            for (int i = 0; i < NUM_LEDS; i++)
-            {
-                leds[i] = chsvValue;
-            }
-            // FastLED.showColor(chsvValue);
-          //  FastLED.show(chsvValue.v);
-            FastLED.show();
-            //previousColor = chsvValue;
+            FastLED.showColor(chsvValue);
             break;
 
         case Mode::Bright:
