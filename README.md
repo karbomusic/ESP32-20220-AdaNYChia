@@ -5,13 +5,13 @@ This is the NYLED ESP32 project adapted for this OLED: https://www.amazon.com/gp
 
 Works with strips and matrixes.  
 
-###OLED 
- OLED_WIDTH 128 
- OLED_HEIGHT 32 
- OLED_ADDR 0x3C 
- PINS: SCL=IO22, SCA=IO21  
+### OLED 
+ OLED_WIDTH 128  
+ OLED_HEIGHT 32  
+ OLED_ADDR 0x3C  
+ PINS: SCL=IO22, SCA=IO21 (GPIO21/22)   
 
-###MATRIX 
+### MATRIX 
 DATA_PIN = IO15  
 NUM_LEDS = 256  
 NUM_ROWS = 8  
@@ -22,16 +22,16 @@ Set NUM_ROWS=1 for LED Strips.
  **Project**  
  ESP32 Project template with builtin OTA, HTTP Server, WiFi connectivity and About page. Only manual OTA updates (/update) are supported.
 
- This is specifcally for the wide/skinny oled display as seen in readme.md.
+ This is specifcally for the wide/skinny oled display as seen in readme.md so you can use that, recode for another one, or just remove the OLED code if not using a display.
 
              
   **Summary**   
-  Project template that includes plumbing and code for a WiFi client + OTA updates via manual update.Automatic updates are not yet implemented but may be ported over from legacy projects.
+  Project template that includes plumbing and code for a WiFi client + OTA updates via manual update. Automatic updates are not yet implemented but may be ported over from legacy projects.
 
              Architecture: ESP32 specific.
             
   **Config**    
-  You must update secrets.h with your WiFi credentials and the hostname you choose for this device.Currently using Elegant OTA.
+  You must update secrets.h with your WiFi credentials and the hostname you choose for this device. Currently using Elegant OTA.
 
              Pre-deloyment configuration checklist:
              
