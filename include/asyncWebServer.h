@@ -36,10 +36,10 @@ String controlPanelHtml;
 AsyncWebServer server(80);
 
 // globals
-uint8_t animationValue = 0; // to inform loop which request was made (needs event).
-uint8_t briteValue = 255;   // used to inform loop of new brightness value.
-CHSV chsvColor(0, 0, 0);    // used to inform loop of new solid color.
-const char *currentAnimation = "Server ready...";
+uint8_t g_animationValue = 0; // to inform loop which request was made (needs event).
+uint8_t g_briteValue = 255;   // used to inform loop of new brightness value.
+CHSV g_chsvColor(0, 0, 0);    // used to inform loop of new solid color.
+const char *g_currentAnimation = "Server ready...";
 
 // incoming parameters
 const char *ANIMATION_PARAM = "animation";
@@ -81,48 +81,48 @@ void startWebServer()
                       switch (intVal)
                       {
                       case 0:
-                          currentAnimation = "Lights Out";
-                          animationValue = 0;
+                          g_currentAnimation = "Lights Out";
+                          g_animationValue = 0;
                           break;
                       case 1:
-                          currentAnimation = "Random Dots";
-                          animationValue = 1;
+                          g_currentAnimation = "Random Dots";
+                          g_animationValue = 1;
                           break;
                       case 2:
-                          currentAnimation = "Random Dots 2";
-                          animationValue = 2;
+                          g_currentAnimation = "Random Dots 2";
+                          g_animationValue = 2;
                           break;
                       case 3:
-                          currentAnimation = "Analog Noise";
-                          animationValue = 3;
+                          g_currentAnimation = "Analog Noise";
+                          g_animationValue = 3;
                           break;
                       case 4:
-                          currentAnimation = "Blue Jumper";
-                          animationValue = 4;
+                          g_currentAnimation = "Blue Jumper";
+                          g_animationValue = 4;
                           break;
                       case 5:
-                          currentAnimation = "Purple Jumper";
-                          animationValue = 5;
+                          g_currentAnimation = "Purple Jumper";
+                          g_animationValue = 5;
                           break;
                       case 6:
-                          currentAnimation = "Scroll Color";
-                          animationValue = 6;
+                          g_currentAnimation = "Scroll Color";
+                          g_animationValue = 6;
                           break;
                       case 7:
-                          currentAnimation = "Flash Color";
-                          animationValue = 7;
+                          g_currentAnimation = "Flash Color";
+                          g_animationValue = 7;
                           break;
                       case 8:
-                          currentAnimation = "Left to Right";
-                          animationValue = 8;
+                          g_currentAnimation = "Left to Right";
+                          g_animationValue = 8;
                           break;
                       default:
-                          currentAnimation = "Lights Out";
-                          animationValue = 0;
+                          g_currentAnimation = "Lights Out";
+                          g_animationValue = 0;
                           break;
                       }
-                      Serial.println("Animation chosen: " + String(currentAnimation) + " (" + String(animationValue) + ")");
-                      request->send(200, "text/plain", "Animation changed to: " + String(currentAnimation));
+                      Serial.println("Animation chosen: " + String(g_currentAnimation) + " (" + String(g_animationValue) + ")");
+                      request->send(200, "text/plain", "Animation changed to: " + String(g_currentAnimation));
                   }
                   else if (request->hasParam(HUE_PARAM) && request->hasParam(SAT_PARAM) && request->hasParam(BRI_PARAM))
                   {
@@ -137,7 +137,7 @@ void startWebServer()
                       uint8_t intSatVal = atoi(satValue.c_str());
                       uint8_t intBriVal = atoi(briValue.c_str());
 
-                      chsvColor = CHSV(intHueVal, intSatVal, intBriVal);
+                      g_chsvColor = CHSV(intHueVal, intSatVal, intBriVal);
                       request->send(200, "text/plain", "Color: H: " + hueValue + " S: " + satValue + " B: " + briValue);
                   }
                   else if (request->hasParam(BRI_PARAM)) // brightness 1.0 was BRITE_PARAM
@@ -147,16 +147,16 @@ void startWebServer()
                       int intVal = atoi(briValue.c_str());
                       if (intVal >= 45 && intVal <= 255) // limit minimum brightness to prevent sudden darkness
                       {
-                          briteValue = uint8_t(intVal);
+                          g_briteValue = uint8_t(intVal);
                       }
-                      Serial.println(String(briteValue));
+                      Serial.println(String(g_briteValue));
                       request->send(200, "text/plain", "Brightness: " + briValue);
                   }
                   else
                   {
                       g_ledMode = Mode::Off;
-                      animationValue = 0; // lights out
-                      currentAnimation = "Lights Out";
+                      g_animationValue = 0; // lights out
+                      g_currentAnimation = "Lights Out";
                       //request->send_P(200, "text/html", index_html, processor);
                       request->send_P(200, "text/html", index_html);
                       // request->send(200, "text/html", controlPanelHtml) ;

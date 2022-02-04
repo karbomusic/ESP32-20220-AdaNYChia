@@ -78,9 +78,9 @@ extern void startWebServer();
 extern bool isWiFiConnected();
 extern String globalIP;
 extern int g_lineHeight;
-extern uint8_t animationValue;
-extern uint8_t briteValue;
-extern CHSV chsvColor;
+extern uint8_t g_animationValue;
+extern uint8_t g_briteValue;
+extern CHSV g_chsvColor;
 extern bool isUpdating;
 extern String ssid;
 extern String rssi;
@@ -166,7 +166,7 @@ void loop()
         display.setCursor(0, 17);
         display.println("Signal: " + String(WiFi.RSSI()) + " dBm");
         display.setCursor(0, 25);
-        display.println(currentAnimation);
+        display.println(g_currentAnimation);
         display.display();
         lastUpdate = millis();
     }
@@ -179,7 +179,7 @@ void loop()
         {
         case Mode::Animation:
             previousMode = Mode::Animation;
-            switch (animationValue)
+            switch (g_animationValue)
             {
             case 0:
                 clearLeds();
@@ -220,19 +220,19 @@ void loop()
             break;
 
         case Mode::SolidColor:
-            if (previousColor != chsvColor)
+            if (previousColor != g_chsvColor)
             {
                 previousMode = Mode::SolidColor;
-                currentAnimation = "Solid Color";
-                previousColor = chsvColor;
-                FastLED.showColor(chsvColor);
+                g_currentAnimation = "Solid Color";
+                previousColor = g_chsvColor;
+                FastLED.showColor(g_chsvColor);
             }
             break;
 
         case Mode::Bright:
-            FastLED.setBrightness(briteValue);
+            FastLED.setBrightness(g_briteValue);
             FastLED.show();
-            chsvColor.v = briteValue;
+            g_chsvColor.v = g_briteValue;
             g_ledMode = previousMode;
             break;
 
