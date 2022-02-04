@@ -53,12 +53,11 @@
 #include <oled.h>
 
 /*-------------------------------------------------------------------
-
 Pre-deloyment configuration
 
 1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
 2. Set <title> in htmlStrings.h
-3. Set power max in main.cpp below (must match PSU used!).
+3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
 -------------------------------------------------------------------*/
@@ -66,6 +65,8 @@ const int DATA_PIN = 15;
 const int NUM_LEDS = 256;
 const int NUM_ROWS = 8;
 const int NUM_COLS = 32;
+const int MAX_CURRENT = 5000; // mA
+const int NUM_VOLTS = 5;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
@@ -77,9 +78,9 @@ extern void startWebServer();
 extern bool isWiFiConnected();
 extern String globalIP;
 extern int g_lineHeight;
-extern int requestValue;
-extern CHSV chsvValue;
+extern uint8_t animationValue;
 extern uint8_t briteValue;
+extern CHSV chsvColor;
 extern bool isUpdating;
 extern String ssid;
 extern String rssi;
@@ -126,7 +127,7 @@ void setup()
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 8000);
+    FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
     FastLED.setBrightness(180);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
@@ -151,7 +152,7 @@ void printDisplayMessage(String msg)
 void loop()
 {
     /*--------------------------------------------------------------------
-        Update oled every second with your text
+        Update oled every interval with your text
     ---------------------------------------------------------------------*/
     EVERY_N_MILLISECONDS(250)
     {
@@ -172,13 +173,13 @@ void loop()
     /*--------------------------------------------------------------------
      Project specific loop code
     ---------------------------------------------------------------------*/
-    EVERY_N_MILLISECONDS(10) // change mode based on user input
+    EVERY_N_MILLISECONDS(10)
     {
-        switch (g_ledMode)
+        switch (g_ledMode) // switch  mode based on user input
         {
         case Mode::Animation:
             previousMode = Mode::Animation;
-            switch (requestValue)
+            switch (animationValue)
             {
             case 0:
                 clearLeds();
@@ -219,14 +220,19 @@ void loop()
             break;
 
         case Mode::SolidColor:
-            previousMode = Mode::SolidColor;
-            currentAnimation = "Solid Color";
-            FastLED.showColor(chsvValue);
+            if (previousColor != chsvColor)
+            {
+                previousMode = Mode::SolidColor;
+                currentAnimation = "Solid Color";
+                previousColor = chsvColor;
+                FastLED.showColor(chsvColor);
+            }
             break;
 
         case Mode::Bright:
             FastLED.setBrightness(briteValue);
             FastLED.show();
+            chsvColor.v = briteValue;
             g_ledMode = previousMode;
             break;
 
@@ -235,7 +241,7 @@ void loop()
             break;
         }
     }
-    // FastLED.delay(10);
+    delay(5); //inhale
 }
 
 /*--------------------------------------------------------------------

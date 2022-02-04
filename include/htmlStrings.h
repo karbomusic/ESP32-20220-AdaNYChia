@@ -1,28 +1,35 @@
 /*+===================================================================
-  File:      strings.h
+  File:      htmlStrings.h
 
-  Summary:   A place for strings.   
+  Summary:   A place for HTML that is persisted in flash memory,
+             via PROGMEM. If we decide to keep using it this way 
+             that is. We actually have more RAM than flash so I may
+             move it to memory later; as we don't need persistence.  
+
+             I was saving this to flash using SPIFFs which is great
+             except it requires a separate filesystem upload which
+             is OK, except it's too easy to forget to do when
+             you're deploying firmware to a new device. It just
+             creates extra deployment steps.
              
-  Kary Wall 2022.
+  Kary Wall 2/3/2022.
 ===================================================================+*/
 
 #include <Arduino.h>
 
-// Post restart redirect
+// Post restart redirect to home page after 10 seconds.
 const String metaRedirect ="<html><head><meta http-equiv=\"refresh\"content=\"10;url=/about\"/></head><body>"
-                           "Restarting in 5 seconds...<br>Returning to about page in 20 seconds.</body></html>";
+                           "Restarting in 5 seconds...<br>Returning to about page in 10 seconds.</body></html>";
 
-// control panel
+// LED Web control panel
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LED Man: Studio Rack</title>
-    <!-- <link href="styles.css" type="text/css" rel="stylesheet"> -->
     <script type=text/javascript>
         function makeHttpObject()  {
             try { return new XMLHttpRequest(); }
@@ -82,7 +89,6 @@ const char index_html[] PROGMEM = R"rawliteral(
             }
             request.send();
         }
-
     </script>
     <style>
         body {
@@ -222,7 +228,6 @@ const char index_html[] PROGMEM = R"rawliteral(
         }
     </style>
 </head>
-
 <body>
     <div>
         <h1 style="text-align: center;">Studio Floor Lighting</h1>
