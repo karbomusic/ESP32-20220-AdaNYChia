@@ -74,4 +74,32 @@ namespace zUtils
         return String((uint32_t)ESP.getEfuseMac(), HEX);
     }
 
+    // this function splits a string and returns an array of strings
+    String *splitHSVParams(String str, char delimiter, int count)
+    {
+        int str_len = str.length();
+        int delimiter_count = 0;
+        int start = 0;
+        int end = 0;
+        for (int i = 0; i < str_len; i++)
+        {
+            if (str.charAt(i) == delimiter)
+            {
+                delimiter_count++;
+            }
+        }
+        count = delimiter_count + 1;
+        String *arr = new String[count];
+        for (int i = 0; i < count; i++)
+        {
+            end = str.indexOf(delimiter, start);
+            if (end == -1)
+            {
+                end = str_len;
+            }
+            arr[i] = str.substring(start, end);
+            start = end + 1;
+        }
+        return arr;
+    }
 }

@@ -1,6 +1,8 @@
 {
     "files.associations": {
-        "functional": "cpp"
+        "functional": "cpp",
+        "bitset": "cpp",
+        "algorithm": "cpp"
     },
     "liveServer.settings.port": 5501
 }
