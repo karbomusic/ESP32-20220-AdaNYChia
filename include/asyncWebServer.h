@@ -47,6 +47,7 @@ const char *BRITE_PARAM = "brite";
 const char *HUE_PARAM = "hue";
 const char *SAT_PARAM = "sat";
 const char *BRI_PARAM = "bri";
+const char *SWATCH_PARAM = "swat";
 
 // Replaces placeholder with section in your web page
 String processor(const String &var)
@@ -70,6 +71,7 @@ void startWebServer()
                   String hueValue;
                   String satValue;
                   String briValue;
+                  String swatValue;
 
                   // Check incoming parameters
                   if (request->hasParam(ANIMATION_PARAM)) // animation
@@ -151,6 +153,17 @@ void startWebServer()
                       }
                       Serial.println(String(g_briteValue));
                       request->send(200, "text/plain", "Brightness: " + briValue);
+                  }
+                  else if (request->hasParam(SWATCH_PARAM)) // it's a swatch
+                  {
+                      g_ledMode = Mode::SolidColor;
+                      swatValue = request->getParam(SWATCH_PARAM)->value();
+                      String *hsvColors = zUtils::splitHSVParams(swatValue, ',', 3);
+                      uint8_t hueValue = hsvColors[0].toInt();
+                      uint8_t satValue = hsvColors[1].toInt();
+                      uint8_t briValue = hsvColors[2].toInt();
+                      g_chsvColor = CHSV(hueValue, satValue, briValue);
+                      request->send(200, "text/plain", "Swatch: " + swatValue);
                   }
                   else
                   {

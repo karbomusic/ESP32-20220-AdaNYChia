@@ -36,6 +36,25 @@
             request.send();
         }
 
+        function setSwatch(value){
+            var request = makeHttpObject();
+            request.open("GET", '?swat=' + value, false);
+            request.onload = function(e){
+                if(request.status === 200)
+                {
+                    console.log(request.responseText);
+                }
+                else
+                {
+                    console.log("Error: " + request.statusText);
+                }
+            }
+            request.onerror = function(e){
+                console.error(request.statusText);
+            }
+            request.send();
+        }
+
         function setColor(sliderId){
             var h = document.getElementById("hue").value;
             var s = document.getElementById("sat").value;
@@ -75,9 +94,26 @@
             color: #dddddd;
         }
 
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            max-width: 370px;
+        }
+
         .center {
             margin-left: auto;
             margin-right: auto;
+        }  
+
+        .solidColorContainer {
+            width: 370px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #464646;
+            padding: 8px;
         }
 
         .aniContainer {
@@ -87,10 +123,9 @@
             border-radius: 5px;
             text-align: center;
             border: 1px solid #464646;
-            padding:8px;
-           /* padding-right:13px; */
+            padding: 8px;
         }
-        
+
         .hsvSlidecontainer {
             width: 370px;
             margin-left: auto;
@@ -98,16 +133,16 @@
             border-radius: 5px;
             text-align: center;
             border: 1px solid #464646;
-            padding:8px;
+            padding: 8px;
         }
 
         .hueSlider {
             -webkit-appearance: none;
             width: 350px;
             height: 35px;
-            background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(241,255,0,1) 17%, 
-            rgba(84,252,69,1) 33%, rgba(69,252,236,1) 49%, rgba(69,81,252,1) 65%, 
-            rgba(252,69,250,1) 81%, rgba(252,69,69,1) 99%);
+            background: linear-gradient(90deg, rgba(255, 0, 0, 1) 0%, rgba(241, 255, 0, 1) 17%,
+                    rgba(84, 252, 69, 1) 33%, rgba(69, 252, 236, 1) 49%, rgba(69, 81, 252, 1) 65%,
+                    rgba(252, 69, 250, 1) 81%, rgba(252, 69, 69, 1) 99%);
             outline: none;
             opacity: 0.7;
             -webkit-transition: .2s;
@@ -180,8 +215,20 @@
             height: 48px;
             font-size: 14pt;
             border: 0;
-        }
+        } 
 
+        .swatch {
+            background-color: #3c5168;
+            color: #dddddd;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+            width: 70px;
+            height: 70px; 
+            font-size: 14pt;
+            border: 0;
+        } 
         .smallButton {
             background-color: rgb(52, 97, 146);
             color: #dddddd;
@@ -210,25 +257,49 @@
 <body>
     <div>
         <h1 style="text-align: center;">Studio Floor Lighting</h1>
-        <!-- <h2 style="text-align: center;">Change Color</h2> -->
-        <div class="hsvSlidecontainer">
-            Hue <input id="hue" type="range" onchange="setColor(this.id)"  min="0" max="255" value="0" class="hueSlider">
-            Saturation <input id="sat" type="range" onchange="setColor(this.id)"  min="0" max="255" value="255" class="slider">
-            Brightness<input id="bri" type="range" onchange="setColor(this.id)"  min="24" max="255" value="150" class="slider">
+        <div class="solidColorContainer">
+        <div class="grid">
+            <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('72,61,137')"></button></div>
+            <div><button class="swatch" style="background-color:#92a1a1" onclick="setSwatch('72,61,85')"></button></div>
+            <div><button class="swatch" style="background-color:#c4e6e6" onclick="setSwatch('72,61,255')"></button></div>
+            <div><button class="swatch" style="background-color:#9dfbfb" onclick="setSwatch('72,115,130')"></button></div>
+            <div><button class="swatch" style="background-color:#fbe1ac" onclick="setSwatch('29,179,255')"></button></div>
+            <div><button class="swatch" style="background-color:#f9cd77" onclick="setSwatch('28,170,216')"></button></div>
+            <div><button class="swatch" style="background-color:#f4a60b" onclick="setSwatch('29,170,149')"></button></div>
+            <div><button class="swatch" style="background-color:#c38509" onclick="setSwatch('29,244,88')"></button></div>
+            <div><button class="swatch" style="background-color:#a7cdffcc" onclick="setSwatch('164,4,255')"></button></div>
+            <div><button class="swatch" style="background-color:#a7cdffcc" onclick="setSwatch('164,4,176')"></button></div>
+            <div><button class="swatch" style="background-color:#73b0ffcc" onclick="setSwatch('164,4,100')"></button></div>
+            <div><button class="swatch" style="background-color:#245fadcc" onclick="setSwatch('164,4,98')"></button></div>
+            <div><button class="swatch" style="background-color:#8c03db" onclick="setSwatch('192,255,93')"></button></div>
+            <div><button class="swatch" style="background-color:#9b0000" onclick="setSwatch('0,255,93')"></button></div>
+            <div><button class="swatch" style="background-color:#ffd208" onclick="setSwatch('21,255,255')"></button></div>
+            <div><button class="swatch" style="background-color:#1b17ff" onclick="setSwatch('167,255,166')"></button></div>
+          </div>
         </div>
-        <h2 style="text-align: center;">Animations</h2>
+        <br>
+        <div class="hsvSlidecontainer">
+            Hue <input id="hue" type="range" onchange="setColor(this.id)" min="0" max="255" value="0" class="hueSlider">
+            Saturation <input id="sat" type="range" onchange="setColor(this.id)" min="0" max="255" value="255"
+                class="slider">
+            Brightness<input id="bri" type="range" onchange="setColor(this.id)" min="24" max="255" value="150"
+                class="slider">
+        </div>
+        <!-- <h2 style="text-align: center;">Animations</h2> -->
+        <br>
         <div class="aniContainer">
-        <div class="center"><button class="button" onclick="setAnimation('1')">Random Dots</button></div>
-        <div class="center"><button class="button" onclick="setAnimation('2')">Random Dots 2</button></div>
-        <div class="center"><button class="button" onclick="setAnimation('3')">Noise</button></div>
-        <div class="center"><button class="button" onclick="setAnimation('4')">Blue Jumper</button></div>
-        <div class="center"><button class="button" onclick="setAnimation('5')">Purple Jumper</button></div>
-        <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>
-        <div class="center"><button class="button" onclick="setAnimation('7')">Flash Color</button></div>
-        <div class="center"><button class="button" onclick="setAnimation('8')">Left to Right</button></div>
-        <div class="center"><button class="button" onclick="setAnimation('')">Off</button></div>
-    </div>
+            <div class="center"><button class="button" onclick="setAnimation('1')">Random Dots</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('2')">Random Dots 2</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('3')">Noise</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('4')">Blue Jumper</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('5')">Purple Jumper</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('7')">Flash Color</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('8')">Left to Right</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('')">Off</button></div>
+        </div>
         <br>
     </div>
 </body>
+
 </html>

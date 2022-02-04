@@ -130,7 +130,7 @@ void setup()
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
     FastLED.setBrightness(180);
-    FastLED.setCorrection(TypicalLEDStrip);
+    // FastLED.setCorrection(UncorrectedTemperature);
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
 
@@ -138,6 +138,17 @@ void setup()
     // When using an anmiation that cares about row order, pass gLeds[]
     // and leds[] to your animation, then use leds[gLeds[i]]
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
+
+    // const int splitCount = 3;
+    // String *paramz = zUtils::splitHSVParams("22,45,90", ',', splitCount);
+
+    // for (int i = 0; i < 3; i++)
+    // {
+    //     Serial.print("paramz[");
+    //     Serial.print(i);
+    //     Serial.print("] = ");
+    //     Serial.println(paramz[i]);
+    // }
 }
 
 void printDisplayMessage(String msg)

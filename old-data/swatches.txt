@@ -1,0 +1,24 @@
+Whites:
+
+Color: H: 72 S: 61 B: 137
+Color: H: 72 S: 61 B: 85
+Color: H: 72 S: 61 B: 255
+Color: H: 72 S: 115 B: 130
+
+Ambers:
+Color: H: 29 S: 179 B: 255
+Color: H: 29 S: 170 B: 216
+Color: H: 29 S: 170 B: 149
+Color: H: 29 S: 244 B: 88
+
+Daylight:
+Color: H: 164 S: 4 B: 255
+Color: H: 164 S: 4 B: 176
+Color: H: 164 S: 4 B: 100
+Color: H: 164 S: 4 B: 98
+
+Colors:
+Color: H: 192 S: 255 B: 93
+Color: H: 0 S: 255 B: 93
+Color: H: 21 S: 255 B: 255
+Color: H: 167 S: 255 B: 166
