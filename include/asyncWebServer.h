@@ -15,16 +15,14 @@
 
 // externs
 extern String ssid;               // WiFi ssid.
-extern String password;           // WiFi password.
 extern String hostName;           // hostname as seen on network.
-extern String softwareVersion;    // used for auto OTA updates & about page.
-extern String deviceFamily;       // used for auto OTA updates & about page.
-extern String description;        // used for about page.
-extern String globalIP;           // needed for about page.
-extern const String metaRedirect; // needed for restart redirect.
+extern String softwareVersion;    // used in about page and your custom needs.
+extern String deviceFamily;       // used in about page and your custom needs.
+extern String description;        // used in about page and your custom needs.
+extern String globalIP;           // used in about page.
+extern const String metaRedirect; // used for restart redirect.
 extern const int activityLED;
-
-AsyncWebServer server(80);
+extern Mode g_ledMode;
 
 // Prototypes
 void handleAbout(AsyncWebServerRequest *request);
@@ -33,17 +31,22 @@ void handleRestart(AsyncWebServerRequest *request);
 void listAllFiles();
 String getControlPanelHTML();
 
+//locals
 String controlPanelHtml;
+AsyncWebServer server(80);
 
-int requestValue = 0;     // to inform loop which request was made (needs event).
-uint8_t briteValue = 255; // used to inform loop new brightness value.
-const char *currentAnimation = "Server ready...";
-bool isUpdating = false;
+// globals
+uint8_t g_animationValue = 0; // to inform loop which request was made (needs event).
+uint8_t g_briteValue = 255;   // used to inform loop of new brightness value.
+CHSV g_chsvColor(0, 0, 0);    // used to inform loop of new solid color.
+const char *g_currentAnimation = "Server ready...";
 
 // incoming parameters
 const char *ANIMATION_PARAM = "animation";
 const char *BRITE_PARAM = "brite";
-
+const char *HUE_PARAM = "hue";
+const char *SAT_PARAM = "sat";
+const char *BRI_PARAM = "bri";
 
 // Replaces placeholder with section in your web page
 String processor(const String &var)
@@ -62,78 +65,101 @@ void startWebServer()
     Serial.println("mDNS responder started");
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { 
-                  String paramValue;
+              {
+                  String animationVal;
+                  String hueValue;
+                  String satValue;
+                  String briValue;
 
                   // Check incoming parameters
                   if (request->hasParam(ANIMATION_PARAM)) // animation
                   {
-                      paramValue = request->getParam(ANIMATION_PARAM)->value();
-                      uint8_t intVal = atoi(paramValue.c_str());
+                      g_ledMode = Mode::Animation;
+                      animationVal = request->getParam(ANIMATION_PARAM)->value();
+                      uint8_t intVal = atoi(animationVal.c_str());
 
                       switch (intVal)
                       {
                       case 0:
-                          currentAnimation = "Lights Out";
-                          requestValue = 0;
+                          g_currentAnimation = "Lights Out";
+                          g_animationValue = 0;
                           break;
                       case 1:
-                          currentAnimation = "Random Dots";
-                          requestValue = 1;
+                          g_currentAnimation = "Random Dots";
+                          g_animationValue = 1;
                           break;
                       case 2:
-                          currentAnimation = "Random Dots 2";
-                          requestValue = 2;
+                          g_currentAnimation = "Random Dots 2";
+                          g_animationValue = 2;
                           break;
                       case 3:
-                          currentAnimation = "Analog Noise";
-                          requestValue = 3;
+                          g_currentAnimation = "Analog Noise";
+                          g_animationValue = 3;
                           break;
                       case 4:
-                          currentAnimation = "Blue Jumper";
-                          requestValue = 4;
+                          g_currentAnimation = "Blue Jumper";
+                          g_animationValue = 4;
                           break;
                       case 5:
-                          currentAnimation = "Purple Jumper";
-                          requestValue = 5;
+                          g_currentAnimation = "Purple Jumper";
+                          g_animationValue = 5;
                           break;
                       case 6:
-                          currentAnimation = "Scroll Color";
-                          requestValue = 6;
+                          g_currentAnimation = "Scroll Color";
+                          g_animationValue = 6;
                           break;
                       case 7:
-                          currentAnimation = "Flash Color";
-                          requestValue = 7;
+                          g_currentAnimation = "Flash Color";
+                          g_animationValue = 7;
                           break;
                       case 8:
-                          currentAnimation = "Left to Right";
-                          requestValue = 8;
+                          g_currentAnimation = "Left to Right";
+                          g_animationValue = 8;
                           break;
                       default:
-                          currentAnimation = "Lights Out";
-                          requestValue = 0;
+                          g_currentAnimation = "Lights Out";
+                          g_animationValue = 0;
                           break;
                       }
-                        Serial.println("Animation chosen: " + String(currentAnimation) + " (" + String(requestValue) + ")");
-                        request->send(200, "text/plain", "Animation changed to: " + String(currentAnimation));
+                      Serial.println("Animation chosen: " + String(g_currentAnimation) + " (" + String(g_animationValue) + ")");
+                      request->send(200, "text/plain", "Animation changed to: " + String(g_currentAnimation));
                   }
-                  else if (request->hasParam(BRITE_PARAM)) // brightness
+                  else if (request->hasParam(HUE_PARAM) && request->hasParam(SAT_PARAM) && request->hasParam(BRI_PARAM))
                   {
-                      paramValue = request->getParam(BRITE_PARAM)->value();
-                      uint8_t intVal = atoi(paramValue.c_str());
-                      if (intVal > 0 && intVal <= 255)
+                      g_ledMode = Mode::SolidColor;
+                      // get the params
+                      hueValue = request->getParam(HUE_PARAM)->value();
+                      satValue = request->getParam(SAT_PARAM)->value();
+                      briValue = request->getParam(BRI_PARAM)->value();
+
+                      // convert to ints
+                      uint8_t intHueVal = atoi(hueValue.c_str());
+                      uint8_t intSatVal = atoi(satValue.c_str());
+                      uint8_t intBriVal = atoi(briValue.c_str());
+
+                      g_chsvColor = CHSV(intHueVal, intSatVal, intBriVal);
+                      request->send(200, "text/plain", "Color: H: " + hueValue + " S: " + satValue + " B: " + briValue);
+                  }
+                  else if (request->hasParam(BRI_PARAM)) // brightness 1.0 was BRITE_PARAM
+                  {
+                      g_ledMode = Mode::Bright;
+                      briValue = request->getParam(BRI_PARAM)->value();
+                      int intVal = atoi(briValue.c_str());
+                      if (intVal >= 45 && intVal <= 255) // limit minimum brightness to prevent sudden darkness
                       {
-                          briteValue = intVal;
+                          g_briteValue = uint8_t(intVal);
                       }
-                      request->send(200, "text/plain", "Brightness: " + paramValue);
+                      Serial.println(String(g_briteValue));
+                      request->send(200, "text/plain", "Brightness: " + briValue);
                   }
                   else
                   {
-                      requestValue = 0; // lights out
-                      currentAnimation = "Lights Out";
+                      g_ledMode = Mode::Off;
+                      g_animationValue = 0; // lights out
+                      g_currentAnimation = "Lights Out";
                       //request->send_P(200, "text/html", index_html, processor);
                       request->send_P(200, "text/html", index_html);
-                     // request->send(200, "text/html", controlPanelHtml) ;
+                      // request->send(200, "text/html", controlPanelHtml) ;
                   }
               });
 
@@ -145,12 +171,12 @@ void startWebServer()
 
     server.onNotFound([](AsyncWebServerRequest *request)
                       { request->send(404, "text/plain", "404 - Not found"); });
-               
+
     AsyncElegantOTA.begin(&server); // Start ElegantOTA
     Serial.println("Update server started! Open your browser and go to http://" + globalIP + "/update");
     Serial.println("or http://" + hostName + "/update");
 
-    server.begin();                 // Start web server
+    server.begin(); // Start web server
     Serial.println("HTTP server started! Open your browser and go to http://" + globalIP);
     Serial.println("or http://" + hostName);
     //listAllFiles();

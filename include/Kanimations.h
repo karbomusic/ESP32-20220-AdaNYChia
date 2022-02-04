@@ -22,13 +22,18 @@ sLED previousLED;
 int currentLEDNum = 0;
 const int ANALONG_PIN = 34;
 
+enum Mode
+{
+    Bright, Animation, SolidColor, Off
+};
+
 void clearLeds()
 {
     FastLED.clear(true);
 }
 
 // prototypes
-int *getLtrTransform(int leds[], int ledNum, int rows = 0, int cols = 0);
+int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
 
 void randomDots2(CRGB leds[], int ledNum)
 {
@@ -66,7 +71,7 @@ void randomNoise(CRGB leds[], int ledNum)
 {
     for (int i = 0; i < ledNum; i++)
     {
-        leds[i] = CHSV(random(255), random(100, 255), random(1, 64));
+        leds[i] = CHSV(random(255), random(100, 255), random(1, 255));
     }
     FastLED.show();
     FastLED.clear();
@@ -77,7 +82,7 @@ void randomPurpleJumper(CRGB leds[], int ledNum)
 {
     for (int i = 0; i < ledNum; i++)
     {
-        leds[i] = CHSV(random(127, 250), random(100, 255), random(1, 64));
+        leds[i] = CHSV(random(127, 250), random(100, 255), random(1, 96));
     }
     leds[random(ledNum)] = CRGB(255, 255, 255);
     FastLED.show();
@@ -89,27 +94,11 @@ void randomBlueJumper(CRGB leds[], int ledNum)
 {
     for (int i = 0; i < ledNum; i++)
     {
-        leds[i] = CHSV(random(86, 172), random(100, 255), random(1, 64));
+        leds[i] = CHSV(random(86, 172), random(100, 255), random(1, 96));
     }
     leds[random(ledNum)] = CRGB(255, 255, 255);
     FastLED.show();
     FastLED.clear();
-    return;
-}
-
-void dotScrollRandomColor(CRGB leds[], int ledNum)
-{
-    for (int i = 0; i < ledNum; i += 3)
-    {
-        if (i < ledNum) // cuz 3
-        {
-            leds[i] = CHSV(random(0, 255), 255, 255);
-            leds[random(ledNum)] = CHSV(128, 150, 100);
-            FastLED.show();
-            delay(22);
-            FastLED.clear();
-        }
-    }
     return;
 }
 
@@ -130,6 +119,22 @@ void flashColor(CRGB leds[], int ledNum, int color)
     }
 }
 
+void dotScrollRandomColor(CRGB leds[], int gTransform[], int ledNum)
+{
+    for (int i = 0; i < ledNum; i += 3)
+    {
+        if (i < ledNum) // cuz 3
+        {
+            leds[gTransform[i]] = CHSV(random(0, 255), 255, 255);
+            leds[random(ledNum)] = CHSV(128, 150, 100);
+            FastLED.show();
+            delay(22);
+            FastLED.clear();
+        }
+    }
+    return;
+}
+
 void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 {
     static int ledIndex;
@@ -137,7 +142,6 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 
     EVERY_N_MILLISECONDS(30)
     {
-
         leds[gTransform[ledIndex]] = CHSV(randomColor, 255, 255);
         FastLED.show();
         ledIndex += 3;

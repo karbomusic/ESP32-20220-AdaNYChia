@@ -3,23 +3,31 @@
             HTTP Server, WiFi connectivity and About page.
             Only manual OTA updates (/update) are supported.
 
-            This is specifcally for the chinese wide/skinny
+            This is specifcally for the wide/skinny
             oled display as seen in readme.md.
   
   File:      main.cpp
 
   Project:   <yourprojectname>
              
-  Summary:   Project template that includes plubming and code for 
+  Summary:   Project template that includes plumbing and code for 
              a WiFi client + OTA updates via manual update.
              Automatic updates are not yet implemented but
-             may be ported over from my legacy projects.
+             may be ported over from legacy projects.
 
              Architecture: ESP32 specific.
             
   Config:    You must update secrets.h with your WiFi credentials
              and the hostname you choose for this device.
              Currently using Elegant OTA.
+
+             Pre-deloyment configuration checklist:
+             
+                1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
+                2. Set <title> in htmlStrings.h
+                3. Set power max in main.cpp below (must match PSU used!).
+                4. Set hostName in secrets.h
+                5. Set ssid and password in secrets.h
 
   Building:  pio run -t <target> -e envName
 
@@ -45,19 +53,20 @@
 #include <oled.h>
 
 /*-------------------------------------------------------------------
-
 Pre-deloyment configuration
 
 1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
 2. Set <title> in htmlStrings.h
-3. Set power max in main.cpp below (must match PSU used!).
-4. set hostName in secrets.h
-5. set ssid and password in secrets.h
+3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
+4. Set hostName in secrets.h
+5. Set ssid and password in secrets.h
 -------------------------------------------------------------------*/
-const int DATA_PIN = 5;
-const int NUM_LEDS = 265;
-const int NUM_ROWS = 1;
-const int NUM_COLS = 0;
+const int DATA_PIN = 15;
+const int NUM_LEDS = 256;
+const int NUM_ROWS = 8;
+const int NUM_COLS = 32;
+const int MAX_CURRENT = 5000; // mA
+const int NUM_VOLTS = 5;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
@@ -69,11 +78,14 @@ extern void startWebServer();
 extern bool isWiFiConnected();
 extern String globalIP;
 extern int g_lineHeight;
-extern int requestValue;
-extern uint8_t briteValue;
+extern uint8_t g_animationValue;
+extern uint8_t g_briteValue;
+extern CHSV g_chsvColor;
 extern bool isUpdating;
 extern String ssid;
 extern String rssi;
+extern int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
+extern Mode g_ledMode = Mode::Off;
 
 // prototypes
 String checkSPIFFS();
@@ -82,6 +94,9 @@ void printDisplayMessage(String msg);
 // locals
 const int activityLED = 12;
 unsigned long lastUpdate = 0;
+bool isSolidColor = false;
+Mode previousMode = Mode::Off;
+CHSV previousColor = CHSV(0, 0, 0);
 
 void setup()
 {
@@ -112,13 +127,15 @@ void setup()
      Project specific setup code
     ---------------------------------------------------------------------*/
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1800);
-    FastLED.setBrightness(255);
+    FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
+    FastLED.setBrightness(180);
     FastLED.setCorrection(TypicalLEDStrip);
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
 
     // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
+    // When using an anmiation that cares about row order, pass gLeds[]
+    // and leds[] to your animation, then use leds[gLeds[i]]
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
 }
 
@@ -135,9 +152,9 @@ void printDisplayMessage(String msg)
 void loop()
 {
     /*--------------------------------------------------------------------
-        Update oled every second with your text
+        Update oled every interval with your text
     ---------------------------------------------------------------------*/
-    if (millis() - lastUpdate > 1000)
+    EVERY_N_MILLISECONDS(250)
     {
         display.clearDisplay();
         display.setTextSize(1);
@@ -149,72 +166,82 @@ void loop()
         display.setCursor(0, 17);
         display.println("Signal: " + String(WiFi.RSSI()) + " dBm");
         display.setCursor(0, 25);
-        display.println(currentAnimation);
+        display.println(g_currentAnimation);
         display.display();
         lastUpdate = millis();
     }
     /*--------------------------------------------------------------------
      Project specific loop code
     ---------------------------------------------------------------------*/
-
-    EVERY_N_MILLISECONDS(150)
+    EVERY_N_MILLISECONDS(10)
     {
-        if (briteValue > 0)
+        switch (g_ledMode) // switch  mode based on user input
         {
-            FastLED.setBrightness(briteValue);
+        case Mode::Animation:
+            previousMode = Mode::Animation;
+            switch (g_animationValue)
+            {
+            case 0:
+                clearLeds();
+                break;
+
+            case 1:
+                randomDots(leds, NUM_LEDS);
+                break;
+
+            case 2:
+                randomDots2(leds, NUM_LEDS);
+                break;
+
+            case 3:
+                randomNoise(leds, NUM_LEDS);
+                break;
+
+            case 4:
+                randomBlueJumper(leds, NUM_LEDS);
+                break;
+
+            case 5:
+                randomPurpleJumper(leds, NUM_LEDS);
+                break;
+
+            case 6:
+                dotScrollRandomColor(leds, gLeds, NUM_LEDS);
+                break;
+
+            case 7:
+                flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
+                break;
+
+            case 8:
+                ltrDot(leds, gLeds, NUM_LEDS);
+                break;
+            }
+            break;
+
+        case Mode::SolidColor:
+            if (previousColor != g_chsvColor)
+            {
+                previousMode = Mode::SolidColor;
+                g_currentAnimation = "Solid Color";
+                previousColor = g_chsvColor;
+                FastLED.showColor(g_chsvColor);
+            }
+            break;
+
+        case Mode::Bright:
+            FastLED.setBrightness(g_briteValue);
             FastLED.show();
-            briteValue = 0;
-        }
-    }
+            g_chsvColor.v = g_briteValue;
+            g_ledMode = previousMode;
+            break;
 
-    EVERY_N_MILLISECONDS(10) // check requestValue from localWebServer and choose animation or brightness
-    {
-
-        switch (requestValue)
-        {
-        case 0:
+        case Mode::Off:
             clearLeds();
             break;
-
-        case 1:
-            randomDots(leds, NUM_LEDS);
-            break;
-
-        case 2:
-            randomDots2(leds, NUM_LEDS);
-            break;
-
-        case 3:
-            randomNoise(leds, NUM_LEDS);
-            break;
-
-        case 4:
-            randomBlueJumper(leds, NUM_LEDS);
-            break;
-
-        case 5:
-            randomPurpleJumper(leds, NUM_LEDS);
-            break;
-
-        case 6:
-            dotScrollRandomColor(leds, NUM_LEDS);
-            break;
-
-        case 7:
-            flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
-            break;
-
-        case 8:
-            ltrDot(leds, gLeds, NUM_LEDS);
-            break;
         }
     }
-
-    /*--------------------------------------------------------------------
-     Required for web server and OTA updates
-    ---------------------------------------------------------------------*/
-    // httpServer.handleClient();
-    // delay(1);
+    delay(5); //inhale
 }
 
 /*--------------------------------------------------------------------
