@@ -60,6 +60,7 @@ Pre-deloyment configuration
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
+6. Set data pin for your device, I'm using 15 or 5.
 -------------------------------------------------------------------*/
 const int DATA_PIN = 15;
 const int NUM_LEDS = 256;
