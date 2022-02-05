@@ -5,13 +5,14 @@
              updates, manual only via Elegant OTA:
              https://github.com/ayushsharma82/ElegantOTA
 
-  Kary Wall 1/30/22.
+  Kary Wall 2/5/22.
 ===================================================================+*/
 
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
 #include <htmlStrings.h>
+#include <regex>
 
 // externs
 extern String ssid;               // WiFi ssid.
@@ -52,19 +53,18 @@ const char *SWATCH_PARAM = "swat";
 // Replaces placeholder with section in your web page
 String processor(const String &var)
 {
+    // not working becasue not sure how it works yet
     if (var == "[TITLE]")
     {
         return hostName;
     }
     return String();
 }
-// ----------------------------------------------------------------------------
 
 void startWebServer()
 {
     // controlPanelHtml = getControlPanelHTML();
     Serial.println("mDNS responder started");
-
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
               {
                   String animationVal;
@@ -73,7 +73,6 @@ void startWebServer()
                   String briValue;
                   String swatValue;
 
-                  // Check incoming parameters
                   if (request->hasParam(ANIMATION_PARAM)) // animation
                   {
                       g_ledMode = Mode::Animation;
@@ -126,28 +125,28 @@ void startWebServer()
                       Serial.println("Animation chosen: " + String(g_currentAnimation) + " (" + String(g_animationValue) + ")");
                       request->send(200, "text/plain", "Animation changed to: " + String(g_currentAnimation));
                   }
-                  else if (request->hasParam(HUE_PARAM) && request->hasParam(SAT_PARAM) && request->hasParam(BRI_PARAM))
+                  else if (request->hasParam(HUE_PARAM))
                   {
                       g_ledMode = Mode::SolidColor;
-                      // get the params
                       hueValue = request->getParam(HUE_PARAM)->value();
-                      satValue = request->getParam(SAT_PARAM)->value();
-                      briValue = request->getParam(BRI_PARAM)->value();
-
-                      // convert to ints
-                      uint8_t intHueVal = atoi(hueValue.c_str());
-                      uint8_t intSatVal = atoi(satValue.c_str());
-                      uint8_t intBriVal = atoi(briValue.c_str());
-
-                      g_chsvColor = CHSV(intHueVal, intSatVal, intBriVal);
-                      request->send(200, "text/plain", "Color: H: " + hueValue + " S: " + satValue + " B: " + briValue);
+                      uint8_t intHueVal = hueValue.toInt();
+                      g_chsvColor.h = intHueVal; 
+                      request->send(200, "text/plain", "Hue: " + hueValue);
                   }
-                  else if (request->hasParam(BRI_PARAM)) // brightness 1.0 was BRITE_PARAM
+                  else if (request->hasParam(SAT_PARAM))
+                  {
+                      g_ledMode = Mode::SolidColor;
+                      satValue = request->getParam(SAT_PARAM)->value();
+                      uint8_t intSatVal = satValue.toInt();
+                      g_chsvColor.s = intSatVal;
+                      request->send(200, "text/plain", "Sat:" + satValue);
+                  }
+                  else if (request->hasParam(BRI_PARAM)) 
                   {
                       g_ledMode = Mode::Bright;
                       briValue = request->getParam(BRI_PARAM)->value();
                       int intVal = atoi(briValue.c_str());
-                      if (intVal >= 45 && intVal <= 255) // limit minimum brightness to prevent sudden darkness
+                      if (intVal >= 50 && intVal <= 255) // limit minimum brightness to prevent sudden darkness
                       {
                           g_briteValue = uint8_t(intVal);
                       }
@@ -171,8 +170,8 @@ void startWebServer()
                       g_animationValue = 0; // lights out
                       g_currentAnimation = "Lights Out";
                       //request->send_P(200, "text/html", index_html, processor);
-                      request->send_P(200, "text/html", index_html);
-                      // request->send(200, "text/html", controlPanelHtml) ;
+                      //request->send_P(200, "text/html", index_html);
+                       request->send(200, "text/html", index_html) ;
                   }
               });
 
@@ -250,6 +249,7 @@ void handleAbout(AsyncWebServerRequest *request)
     bangLED(LOW);
 }
 
+// not currently used.
 String getControlPanelHTML()
 {
     String cpHTML = "";

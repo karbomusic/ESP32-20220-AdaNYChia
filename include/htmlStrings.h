@@ -22,7 +22,8 @@ const String metaRedirect ="<html><head><meta http-equiv=\"refresh\"content=\"10
                            "Restarting in 5 seconds...<br>Returning to about page in 10 seconds.</body></html>";
 
 // LED Web control panel
-const char index_html[] PROGMEM = R"rawliteral(
+//const char index_html[] PROGMEM = R"rawliteral(
+const String index_html = R"rawliteral(
 <!DOCTYPE html>
 <html lang="en">
 
@@ -91,9 +92,17 @@ const char index_html[] PROGMEM = R"rawliteral(
             { 
                 request.open("GET", '?bri=' + v, false); // brightness is global 
             }
+            else if(sliderId==="sat")
+            {
+                request.open("GET", '?sat=' + s, false); // saturation is global
+            }
+            else if(sliderId==="hue")
+            {
+                request.open("GET", '?hue=' + h, false); // hue is global
+            }
             else
             {
-                request.open("GET", '?hue=' + h + '&sat=' + s + '&bri=' + v, false);
+                console.log("Error: sliderId not recognized");
             }
             request.onload = function(e){
                 if(request.status === 200)

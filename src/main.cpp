@@ -55,20 +55,19 @@
 /*-------------------------------------------------------------------
 Pre-deloyment configuration
 
-1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
+1. Set DATA_PIN, NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
 2. Set <title> in htmlStrings.h
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
-6. Set data pin for your device, I'm using 15 or 5.
 -------------------------------------------------------------------*/
-const int DATA_PIN = 15;
-const int NUM_LEDS = 256;
-const int NUM_ROWS = 8;
-const int NUM_COLS = 32;
-const int MAX_CURRENT = 5000; // mA
+const int DATA_PIN = 5;
+const int NUM_LEDS = 300;
+const int NUM_ROWS = 1;
+const int NUM_COLS = 0;
+const int MAX_CURRENT = 6000; // mA
 const int NUM_VOLTS = 5;
-
+ 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
 
@@ -91,6 +90,7 @@ extern Mode g_ledMode = Mode::Off;
 // prototypes
 String checkSPIFFS();
 void printDisplayMessage(String msg);
+uint8_t getBrigtnessLimit();
 
 // locals
 const int activityLED = 12;
@@ -118,10 +118,7 @@ void setup()
     ---------------------------------------------------------------------*/
     printDisplayMessage("Wifi...");
     startWifi();
-    //printDisplayMessage("SPIFFS..");
-    //checkSPIFFS();
     printDisplayMessage("Server...");
-    //startUpdateServer();
     startWebServer();
 
     /*--------------------------------------------------------------------
@@ -130,7 +127,6 @@ void setup()
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
     FastLED.setBrightness(180);
-    // FastLED.setCorrection(UncorrectedTemperature);
     pinMode(ANALONG_PIN, INPUT);
     randomSeed(analogRead(ANALONG_PIN));
 
@@ -138,17 +134,6 @@ void setup()
     // When using an anmiation that cares about row order, pass gLeds[]
     // and leds[] to your animation, then use leds[gLeds[i]]
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
-
-    // const int splitCount = 3;
-    // String *paramz = zUtils::splitHSVParams("22,45,90", ',', splitCount);
-
-    // for (int i = 0; i < 3; i++)
-    // {
-    //     Serial.print("paramz[");
-    //     Serial.print(i);
-    //     Serial.print("] = ");
-    //     Serial.println(paramz[i]);
-    // }
 }
 
 void printDisplayMessage(String msg)
@@ -237,6 +222,8 @@ void loop()
                 previousMode = Mode::SolidColor;
                 g_currentAnimation = "Solid Color";
                 previousColor = g_chsvColor;
+                g_chsvColor.v = getBrigtnessLimit();
+                Serial.println(g_chsvColor.v);
                 FastLED.showColor(g_chsvColor);
             }
             break;
@@ -258,7 +245,16 @@ void loop()
 
 /*--------------------------------------------------------------------
      Project specific utility code (otherwise use zUtils.h)
+     ** not currently used **
 ---------------------------------------------------------------------*/
+
+// FastLED.showColor which I really need doesn't trigger the current limter code,
+// this is a workaround to calculate it for solid colors.
+uint8_t getBrigtnessLimit(){
+    return calculate_max_brightness_for_power_mW(leds, NUM_LEDS, 
+    g_chsvColor.v, calculate_unscaled_power_mW(leds, NUM_LEDS));
+}
+
 String checkSPIFFS()
 {
     // SPIFFs support
