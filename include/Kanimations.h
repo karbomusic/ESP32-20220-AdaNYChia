@@ -82,7 +82,7 @@ void randomPurpleJumper(CRGB leds[], int ledNum)
 {
     for (int i = 0; i < ledNum; i++)
     {
-        leds[i] = CHSV(random(127, 250), random(100, 255), random(1, 96));
+        leds[i] = CHSV(random(127, 250), random(100, 255), random(1, 60));
     }
     leds[random(ledNum)] = CRGB(255, 255, 255);
     FastLED.show();
@@ -94,7 +94,7 @@ void randomBlueJumper(CRGB leds[], int ledNum)
 {
     for (int i = 0; i < ledNum; i++)
     {
-        leds[i] = CHSV(random(86, 172), random(100, 255), random(1, 96));
+        leds[i] = CHSV(random(86, 172), random(100, 255), random(1, 60));
     }
     leds[random(ledNum)] = CRGB(255, 255, 255);
     FastLED.show();

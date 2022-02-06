@@ -43,6 +43,7 @@
   Kary Wall 1/20/2022.
 ===================================================================+*/
 
+#define FASTLED_INTERNAL // Quiets build noise
 #include <Arduino.h>
 #include "SPIFFS.h"
 #include <zUtils.h>

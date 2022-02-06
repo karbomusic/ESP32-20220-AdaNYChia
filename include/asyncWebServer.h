@@ -12,7 +12,7 @@
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
 #include <htmlStrings.h>
-#include <regex>
+
 
 // externs
 extern String ssid;               // WiFi ssid.
@@ -146,7 +146,7 @@ void startWebServer()
                       g_ledMode = Mode::Bright;
                       briValue = request->getParam(BRI_PARAM)->value();
                       int intVal = atoi(briValue.c_str());
-                      if (intVal >= 50 && intVal <= 255) // limit minimum brightness to prevent sudden darkness
+                      if (intVal >= 24 && intVal <= 255) // limit minimum brightness to prevent sudden darkness
                       {
                           g_briteValue = uint8_t(intVal);
                       }
