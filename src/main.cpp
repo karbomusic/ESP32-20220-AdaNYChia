@@ -29,6 +29,9 @@
                 4. Set hostName in secrets.h
                 5. Set ssid and password in secrets.h
 
+  Brite Knob: You use a 10k Potentiometer to control the brightness
+              of the LEDs. To eanble set #define BRITE_KNOB = 1
+
   Building:  pio run -t <target> -e envName
 
              Examples:
@@ -61,12 +64,15 @@ Pre-deloyment configuration
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
+6. Enable USE_BRITE_KNOB if using an analog brightness knob (GPIO35).
 -------------------------------------------------------------------*/
-const int DATA_PIN = 22;
-const int NUM_LEDS = 8;
+#define USE_BRITE_KNOB 1 // Use installed brite knob
+const int BRITE_KNOB_PIN = 35;
+const int DATA_PIN = 5;
+const int NUM_LEDS = 120;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 500; // mA
+const int MAX_CURRENT = 3000; // mA
 const int NUM_VOLTS = 5;
 
 CRGB leds[NUM_LEDS];
@@ -92,6 +98,7 @@ extern Mode g_ledMode = Mode::Off;
 String checkSPIFFS();
 void printDisplayMessage(String msg);
 uint8_t getBrigtnessLimit();
+void checkBriteKnob();
 
 // locals
 const int activityLED = 12;
@@ -99,7 +106,6 @@ unsigned long lastUpdate = 0;
 bool isSolidColor = false;
 Mode previousMode = Mode::Off;
 CHSV previousColor = CHSV(0, 0, 0);
-const int KNOB_PIN = 35;
 int lastKnobValue = 0;
 
 void setup()
@@ -115,7 +121,7 @@ void setup()
     zUtils::getChipInfo();
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
-    pinMode(KNOB_PIN, INPUT);
+    pinMode(BRITE_KNOB_PIN, INPUT);
 
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
@@ -177,16 +183,10 @@ void loop()
 
     EVERY_N_MILLISECONDS(1)
     {
-        int mVal = map(analogRead(KNOB_PIN), 0, 4095, 0, 255);
-        if (mVal != lastKnobValue)
-        {
-            if (abs(mVal - lastKnobValue) > 2) // faked smoothing (includes .1 UF cap on knob)
-            {
-                g_ledMode = Mode::Bright;
-                g_briteValue = mVal;
-                lastKnobValue = mVal;
-            }
-        }
+
+#if USE_BRITE_KNOB
+        checkBriteKnob();
+#endif
 
         switch (g_ledMode) // switch  mode based on user input
         {
@@ -262,6 +262,21 @@ void loop()
      Project specific utility code (otherwise use zUtils.h)
      ** not currently used **
 ---------------------------------------------------------------------*/
+#if USE_BRITE_KNOB
+void checkBriteKnob()
+{
+    int mVal = map(analogRead(BRITE_KNOB_PIN), 0, 4095, 0, 255);
+    if (mVal != lastKnobValue)
+    {
+        if (abs(mVal - lastKnobValue) > 2) // faked smoothing (includes .1 UF cap on knob)
+        {
+            g_ledMode = Mode::Bright;
+            g_briteValue = mVal;
+            lastKnobValue = mVal;
+        }
+    }
+}
+#endif
 
 // FastLED.showColor which I really need doesn't trigger the current limter code,
 // this is a workaround to calculate it for solid colors.
@@ -273,7 +288,7 @@ uint8_t getBrigtnessLimit()
 
 String checkSPIFFS()
 {
-    // SPIFFs support
+    // Mount SPIFFS if we are using it
     if (!SPIFFS.begin(true))
     {
         return "An Error has occurred while mounting SPIFFS";
