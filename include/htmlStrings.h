@@ -31,7 +31,7 @@ const String index_html = R"rawliteral(
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED Man: Studio Floor</title>
+    <title>LED Man: Kitchen</title>
     <!-- <link href="styles.css" type="text/css" rel="stylesheet"> -->
     <script type=text/javascript>
         function makeHttpObject()  {
@@ -119,7 +119,6 @@ const String index_html = R"rawliteral(
             }
             request.send();
         }
-
     </script>
     <style>
         body {
@@ -325,6 +324,7 @@ const String index_html = R"rawliteral(
             <div class="center"><button class="button" onclick="setAnimation('1')">Random Dots</button></div>
             <div class="center"><button class="button" onclick="setAnimation('2')">Random Dots 2</button></div>
             <div class="center"><button class="button" onclick="setAnimation('3')">Noise</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('9')">Campfire</button></div>
             <div class="center"><button class="button" onclick="setAnimation('4')">Blue Jumper</button></div>
             <div class="center"><button class="button" onclick="setAnimation('5')">Purple Jumper</button></div>
             <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>

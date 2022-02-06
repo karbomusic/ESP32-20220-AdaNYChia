@@ -5,29 +5,32 @@
 
             This is specifcally for the wide/skinny
             oled display as seen in readme.md.
-  
+
   File:      main.cpp
 
   Project:   <yourprojectname>
-             
-  Summary:   Project template that includes plumbing and code for 
+
+  Summary:   Project template that includes plumbing and code for
              a WiFi client + OTA updates via manual update.
              Automatic updates are not yet implemented but
              may be ported over from legacy projects.
 
              Architecture: ESP32 specific.
-            
+
   Config:    You must update secrets.h with your WiFi credentials
              and the hostname you choose for this device.
              Currently using Elegant OTA.
 
              Pre-deloyment configuration checklist:
-             
+
                 1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
                 2. Set <title> in htmlStrings.h
                 3. Set power max in main.cpp below (must match PSU used!).
                 4. Set hostName in secrets.h
                 5. Set ssid and password in secrets.h
+
+  Brite Knob: You use a 10k Potentiometer to control the brightness
+              of the LEDs. To eanble set #define BRITE_KNOB = 1
 
   Building:  pio run -t <target> -e envName
 
@@ -56,42 +59,57 @@
 /*-------------------------------------------------------------------
 Pre-deloyment configuration
 
-1. Set DATA_PIN, NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
+1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
 2. Set <title> in htmlStrings.h
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
+6. Enable USE_BRITE_KNOB if using an analog brightness knob (GPIO35).
+7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
+#define USE_BRITE_KNOB 1 // Use installed brite knob
+#define RND_PIN 34
+const int BRITE_KNOB_PIN = 35;
 const int DATA_PIN = 5;
-const int NUM_LEDS = 300;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 6000; // mA
+const int MAX_CURRENT = 5000; // mA
 const int NUM_VOLTS = 5;
- 
+
+// #define USE_BRITE_KNOB 1 // Use installed brite knob
+// #define RND_PIN 34
+// const int BRITE_KNOB_PIN = 35;
+// const int DATA_PIN = 15;
+// const int NUM_ROWS = 8;
+// const int NUM_COLS = 32;
+// const int MAX_CURRENT = 4000; // mA
+// const int NUM_VOLTS = 5;
+
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
 
-// externs
+// template externs and globals
 extern Adafruit_SSD1306 display;
 extern void startWifi();
 extern void startWebServer();
 extern bool isWiFiConnected();
+extern String ssid;
+extern String rssi;
 extern String globalIP;
 extern int g_lineHeight;
+
+// project specific externs and globals
+extern int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
+extern Mode g_ledMode = Mode::Off;
 extern uint8_t g_animationValue;
 extern uint8_t g_briteValue;
 extern CHSV g_chsvColor;
-extern bool isUpdating;
-extern String ssid;
-extern String rssi;
-extern int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
-extern Mode g_ledMode = Mode::Off;
 
 // prototypes
 String checkSPIFFS();
 void printDisplayMessage(String msg);
 uint8_t getBrigtnessLimit();
+void checkBriteKnob();
 
 // locals
 const int activityLED = 12;
@@ -99,6 +117,7 @@ unsigned long lastUpdate = 0;
 bool isSolidColor = false;
 Mode previousMode = Mode::Off;
 CHSV previousColor = CHSV(0, 0, 0);
+int lastKnobValue = 0;
 
 void setup()
 {
@@ -113,6 +132,7 @@ void setup()
     zUtils::getChipInfo();
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
+    pinMode(BRITE_KNOB_PIN, INPUT);
 
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
@@ -128,13 +148,16 @@ void setup()
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
     FastLED.setBrightness(180);
-    pinMode(ANALONG_PIN, INPUT);
-    randomSeed(analogRead(ANALONG_PIN));
+    pinMode(RND_PIN, INPUT);
+    randomSeed(analogRead(RND_PIN));
 
     // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
     // When using an anmiation that cares about row order, pass gLeds[]
     // and leds[] to your animation, then use leds[gLeds[i]]
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
+
+    // some fastl led built-ins for various FX.
+    gPal = HeatColors_p;
 }
 
 void printDisplayMessage(String msg)
@@ -149,11 +172,17 @@ void printDisplayMessage(String msg)
 
 void loop()
 {
+    random16_add_entropy(random(255));
+
+    
+ 
+
     /*--------------------------------------------------------------------
         Update oled every interval with your text
     ---------------------------------------------------------------------*/
     EVERY_N_MILLISECONDS(250)
     {
+
         display.clearDisplay();
         display.setTextSize(1);
         display.setTextColor(WHITE);
@@ -171,8 +200,14 @@ void loop()
     /*--------------------------------------------------------------------
      Project specific loop code
     ---------------------------------------------------------------------*/
-    EVERY_N_MILLISECONDS(10)
+
+    EVERY_N_MILLISECONDS(1)
     {
+
+#if USE_BRITE_KNOB
+        checkBriteKnob();
+#endif
+
         switch (g_ledMode) // switch  mode based on user input
         {
         case Mode::Animation:
@@ -214,6 +249,8 @@ void loop()
             case 8:
                 ltrDot(leds, gLeds, NUM_LEDS);
                 break;
+            case 9:
+                Fire2012WithPalette(leds); // if thsi works change all to NUM_LEDS
             }
             break;
 
@@ -224,7 +261,6 @@ void loop()
                 g_currentAnimation = "Solid Color";
                 previousColor = g_chsvColor;
                 g_chsvColor.v = getBrigtnessLimit();
-                Serial.println(g_chsvColor.v);
                 FastLED.showColor(g_chsvColor);
             }
             break;
@@ -241,24 +277,40 @@ void loop()
             break;
         }
     }
-    delay(5); //inhale
+    delay(1); // inhale
 }
 
 /*--------------------------------------------------------------------
      Project specific utility code (otherwise use zUtils.h)
      ** not currently used **
 ---------------------------------------------------------------------*/
+#if USE_BRITE_KNOB
+void checkBriteKnob()
+{
+    int mVal = map(analogRead(BRITE_KNOB_PIN), 0, 4095, 0, 255);
+    if (mVal != lastKnobValue)
+    {
+        if (abs(mVal - lastKnobValue) > 2) // faked smoothing (includes .1 UF cap on knob)
+        {
+            g_ledMode = Mode::Bright;
+            g_briteValue = mVal;
+            lastKnobValue = mVal;
+        }
+    }
+}
+#endif
 
 // FastLED.showColor which I really need doesn't trigger the current limter code,
 // this is a workaround to calculate it for solid colors.
-uint8_t getBrigtnessLimit(){
-    return calculate_max_brightness_for_power_mW(leds, NUM_LEDS, 
-    g_chsvColor.v, calculate_unscaled_power_mW(leds, NUM_LEDS));
+uint8_t getBrigtnessLimit()
+{
+    return calculate_max_brightness_for_power_mW(leds, NUM_LEDS,
+                                                 g_chsvColor.v, calculate_unscaled_power_mW(leds, NUM_LEDS));
 }
 
 String checkSPIFFS()
 {
-    // SPIFFs support
+    // Mount SPIFFS if we are using it
     if (!SPIFFS.begin(true))
     {
         return "An Error has occurred while mounting SPIFFS";
