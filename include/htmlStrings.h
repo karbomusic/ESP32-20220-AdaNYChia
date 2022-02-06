@@ -31,7 +31,7 @@ const String index_html = R"rawliteral(
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED Man: Kitchen</title>
+    <title>LED Man: Studio Floor</title>
     <!-- <link href="styles.css" type="text/css" rel="stylesheet"> -->
     <script type=text/javascript>
         function makeHttpObject()  {
@@ -62,8 +62,17 @@ const String index_html = R"rawliteral(
             request.send();
         }
 
+        function updateSliders(value)
+        {
+            values = value.split(",");
+            var hSlider = document.getElementById("hue").value = values[0];
+            var sSlider = document.getElementById("sat").value = values[1];
+            var vSlider = document.getElementById("bri").value = values[2];
+        }
+
         function setSwatch(value){
             var request = makeHttpObject();
+            updateSliders(value);
             request.open("GET", '?swat=' + value, false);
             request.onload = function(e){
                 if(request.status === 200)
@@ -137,7 +146,7 @@ const String index_html = R"rawliteral(
         .center {
             margin-left: auto;
             margin-right: auto;
-        }  
+        }
 
         .solidColorContainer {
             width: 370px;
@@ -248,7 +257,7 @@ const String index_html = R"rawliteral(
             height: 48px;
             font-size: 14pt;
             border: 0;
-        } 
+        }
 
         .swatch {
             background-color: #3c5168;
@@ -258,10 +267,11 @@ const String index_html = R"rawliteral(
             padding: 5px;
             margin: 5px;
             width: 70px;
-            height: 70px; 
+            height: 70px;
             font-size: 14pt;
             border: 0;
-        } 
+        }
+
         .smallButton {
             background-color: rgb(52, 97, 146);
             color: #dddddd;
@@ -291,24 +301,40 @@ const String index_html = R"rawliteral(
     <div>
         <h1 style="text-align: center;">Studio Floor Lighting</h1>
         <div class="solidColorContainer">
-        <div class="grid">
-            <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('72,61,137')"></button></div>
-            <div><button class="swatch" style="background-color:#92a1a1" onclick="setSwatch('72,61,85')"></button></div>
-            <div><button class="swatch" style="background-color:#c4e6e6" onclick="setSwatch('72,61,255')"></button></div>
-            <div><button class="swatch" style="background-color:#9dfbfb" onclick="setSwatch('72,115,130')"></button></div>
-            <div><button class="swatch" style="background-color:#fbe1ac" onclick="setSwatch('29,179,255')"></button></div>
-            <div><button class="swatch" style="background-color:#f9cd77" onclick="setSwatch('28,170,216')"></button></div>
-            <div><button class="swatch" style="background-color:#f4a60b" onclick="setSwatch('29,170,149')"></button></div>
-            <div><button class="swatch" style="background-color:#c38509" onclick="setSwatch('29,244,88')"></button></div>
-            <div><button class="swatch" style="background-color:#a7cdffcc" onclick="setSwatch('164,4,255')"></button></div>
-            <div><button class="swatch" style="background-color:#a7cdffcc" onclick="setSwatch('164,4,176')"></button></div>
-            <div><button class="swatch" style="background-color:#73b0ffcc" onclick="setSwatch('164,4,100')"></button></div>
-            <div><button class="swatch" style="background-color:#245fadcc" onclick="setSwatch('164,4,98')"></button></div>
-            <div><button class="swatch" style="background-color:#8c03db" onclick="setSwatch('192,255,93')"></button></div>
-            <div><button class="swatch" style="background-color:#9b0000" onclick="setSwatch('0,255,93')"></button></div>
-            <div><button class="swatch" style="background-color:#ffd208" onclick="setSwatch('21,255,255')"></button></div>
-            <div><button class="swatch" style="background-color:#1b17ff" onclick="setSwatch('167,255,166')"></button></div>
-          </div>
+            <div class="grid">
+                <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('72,61,137')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#92a1a1" onclick="setSwatch('72,61,85')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#c4e6e6" onclick="setSwatch('72,61,255')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#9dfbfb" onclick="setSwatch('72,115,130')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#fbe1ac" onclick="setSwatch('29,179,255')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#f9cd77" onclick="setSwatch('28,170,216')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#f4a60b" onclick="setSwatch('29,170,149')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#c38509" onclick="setSwatch('29,244,88')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#a7cdffcc"
+                        onclick="setSwatch('164,4,255')"></button></div>
+                <div><button class="swatch" style="background-color:#a7cdffcc"
+                        onclick="setSwatch('164,4,176')"></button></div>
+                <div><button class="swatch" style="background-color:#73b0ffcc"
+                        onclick="setSwatch('164,4,100')"></button></div>
+                <div><button class="swatch" style="background-color:#245fadcc" onclick="setSwatch('164,4,98')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#8c03db" onclick="setSwatch('192,255,93')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#9b0000" onclick="setSwatch('0,255,93')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#ffd208" onclick="setSwatch('21,255,255')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#1b17ff"
+                        onclick="setSwatch('167,255,166')"></button></div>
+            </div>
         </div>
         <br>
         <div class="hsvSlidecontainer">
@@ -324,12 +350,12 @@ const String index_html = R"rawliteral(
             <div class="center"><button class="button" onclick="setAnimation('1')">Random Dots</button></div>
             <div class="center"><button class="button" onclick="setAnimation('2')">Random Dots 2</button></div>
             <div class="center"><button class="button" onclick="setAnimation('3')">Noise</button></div>
-            <div class="center"><button class="button" onclick="setAnimation('9')">Campfire</button></div>
             <div class="center"><button class="button" onclick="setAnimation('4')">Blue Jumper</button></div>
             <div class="center"><button class="button" onclick="setAnimation('5')">Purple Jumper</button></div>
             <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>
             <div class="center"><button class="button" onclick="setAnimation('7')">Flash Color</button></div>
             <div class="center"><button class="button" onclick="setAnimation('8')">Left to Right</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('9')">Campfire</button></div>
             <div class="center"><button class="button" onclick="setAnimation('')">Off</button></div>
         </div>
         <br>

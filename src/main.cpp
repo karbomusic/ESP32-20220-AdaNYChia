@@ -249,8 +249,10 @@ void loop()
             case 8:
                 ltrDot(leds, gLeds, NUM_LEDS);
                 break;
+
             case 9:
                 Fire2012WithPalette(leds); // if thsi works change all to NUM_LEDS
+                break;
             }
             break;
 
