@@ -59,40 +59,51 @@
 /*-------------------------------------------------------------------
 Pre-deloyment configuration
 
-1. Set DATA_PIN, NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
+1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
 2. Set <title> in htmlStrings.h
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
 6. Enable USE_BRITE_KNOB if using an analog brightness knob (GPIO35).
+7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
 #define USE_BRITE_KNOB 1 // Use installed brite knob
+#define RND_PIN 34
 const int BRITE_KNOB_PIN = 35;
 const int DATA_PIN = 5;
-const int NUM_LEDS = 120;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 3000; // mA
+const int MAX_CURRENT = 5000; // mA
 const int NUM_VOLTS = 5;
+
+// #define USE_BRITE_KNOB 1 // Use installed brite knob
+// #define RND_PIN 34
+// const int BRITE_KNOB_PIN = 35;
+// const int DATA_PIN = 15;
+// const int NUM_ROWS = 8;
+// const int NUM_COLS = 32;
+// const int MAX_CURRENT = 4000; // mA
+// const int NUM_VOLTS = 5;
 
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
 
-// externs
+// template externs and globals
 extern Adafruit_SSD1306 display;
 extern void startWifi();
 extern void startWebServer();
 extern bool isWiFiConnected();
+extern String ssid;
+extern String rssi;
 extern String globalIP;
 extern int g_lineHeight;
+
+// project specific externs and globals
+extern int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
+extern Mode g_ledMode = Mode::Off;
 extern uint8_t g_animationValue;
 extern uint8_t g_briteValue;
 extern CHSV g_chsvColor;
-extern bool isUpdating;
-extern String ssid;
-extern String rssi;
-extern int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
-extern Mode g_ledMode = Mode::Off;
 
 // prototypes
 String checkSPIFFS();
@@ -137,13 +148,16 @@ void setup()
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
     FastLED.setBrightness(180);
-    pinMode(ANALONG_PIN, INPUT);
-    randomSeed(analogRead(ANALONG_PIN));
+    pinMode(RND_PIN, INPUT);
+    randomSeed(analogRead(RND_PIN));
 
     // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
     // When using an anmiation that cares about row order, pass gLeds[]
     // and leds[] to your animation, then use leds[gLeds[i]]
     *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
+
+    // some fastl led built-ins for various FX.
+    gPal = HeatColors_p;
 }
 
 void printDisplayMessage(String msg)
@@ -158,11 +172,17 @@ void printDisplayMessage(String msg)
 
 void loop()
 {
+    random16_add_entropy(random(255));
+
+    
+ 
+
     /*--------------------------------------------------------------------
         Update oled every interval with your text
     ---------------------------------------------------------------------*/
     EVERY_N_MILLISECONDS(250)
     {
+
         display.clearDisplay();
         display.setTextSize(1);
         display.setTextColor(WHITE);
@@ -229,6 +249,8 @@ void loop()
             case 8:
                 ltrDot(leds, gLeds, NUM_LEDS);
                 break;
+            case 9:
+                Fire2012WithPalette(leds); // if thsi works change all to NUM_LEDS
             }
             break;
 

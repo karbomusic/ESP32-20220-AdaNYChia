@@ -1,7 +1,7 @@
 /*+===================================================================
   File:      asyncWebServer.h
 
-  Summary:   Provides an Async HTTP server and HTTPUploader for OTA 
+  Summary:   Provides an Async HTTP server and HTTPUploader for OTA
              updates, manual only via Elegant OTA:
              https://github.com/ayushsharma82/ElegantOTA
 
@@ -12,7 +12,6 @@
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
 #include <htmlStrings.h>
-
 
 // externs
 extern String ssid;               // WiFi ssid.
@@ -32,7 +31,7 @@ void handleRestart(AsyncWebServerRequest *request);
 void listAllFiles();
 String getControlPanelHTML();
 
-//locals
+// locals
 String controlPanelHtml;
 AsyncWebServer server(80);
 
@@ -117,6 +116,10 @@ void startWebServer()
                           g_currentAnimation = "Left to Right";
                           g_animationValue = 8;
                           break;
+                      case 9:
+                          g_currentAnimation = "Campfire";
+                          g_animationValue = 9;
+                          break;
                       default:
                           g_currentAnimation = "Lights Out";
                           g_animationValue = 0;
@@ -172,8 +175,7 @@ void startWebServer()
                       //request->send_P(200, "text/html", index_html, processor);
                       //request->send_P(200, "text/html", index_html);
                        request->send(200, "text/html", index_html) ;
-                  }
-              });
+                  } });
 
     server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request)
               { handleRestart(request); });
@@ -191,7 +193,7 @@ void startWebServer()
     server.begin(); // Start web server
     Serial.println("HTTP server started! Open your browser and go to http://" + globalIP);
     Serial.println("or http://" + hostName);
-    //listAllFiles();
+    // listAllFiles();
 }
 
 void handleRestart(AsyncWebServerRequest *request)

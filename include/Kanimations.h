@@ -8,6 +8,11 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
+#define FRAMES_PER_SECOND 60
+#define COOLING  55
+#define SPARKING 120
+#define NUM_LEDS 120
+
 // Structure for remebering a pixel's color.
 // Had to name to sLED due to some conflict
 struct sLED
@@ -18,23 +23,27 @@ struct sLED
     uint8_t V;
 };
 
-sLED previousLED;
-int currentLEDNum = 0;
-const int ANALONG_PIN = 34;
-
 enum Mode
 {
     Bright, Animation, SolidColor, Off
 };
+
+// prototypes
+int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
+
+sLED previousLED;
+int currentLEDNum = 0;
+CRGBPalette16 gPal;
+bool gReverseDirection = false;
 
 void clearLeds()
 {
     FastLED.clear(true);
 }
 
-// prototypes
-int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
-
+/*--------------------------------------------------------------------
+                         FASTLED ANIMATIONS
+---------------------------------------------------------------------*/
 void randomDots2(CRGB leds[], int ledNum)
 {
     currentLEDNum = random(ledNum - 1);
@@ -160,6 +169,45 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
         randomColor = random(0, 255);
 }
 
+void Fire2012WithPalette(CRGB leds[])
+{
+// Array of temperature readings at each simulation cell
+// kw: Leaving some room at top for the darkness (20%)
+  static uint8_t heat[int(NUM_LEDS*0.7)];
+
+  // Step 1.  Cool down every cell a little
+    for( int i = 0; i < NUM_LEDS; i++) {
+      heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
+    }
+  
+    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+    for( int k= NUM_LEDS - 1; k >= 2; k--) {
+      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
+    }
+    
+    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
+    if( random8() < SPARKING ) {
+      int y = random8(7);
+      heat[y] = qadd8( heat[y], random8(160,255) );
+    }
+
+    // Step 4.  Map from heat cells to LED colors
+    for( int j = 0; j < NUM_LEDS; j++) {
+      // Scale the heat value from 0-255 down to 0-240
+      // for best results with color palettes.
+      uint8_t colorindex = scale8( heat[j], 240);
+      CRGB color = ColorFromPalette( gPal, colorindex);
+      int pixelnumber;
+      if( gReverseDirection ) {
+        pixelnumber = (NUM_LEDS-1) - j;
+      } else {
+        pixelnumber = j;
+      }
+      leds[pixelnumber] = color;
+    }
+
+    FastLED.delay(1000 / FRAMES_PER_SECOND);
+}
 /*--------------------------------------------------------------------
                          Utility functions
 ---------------------------------------------------------------------*/
