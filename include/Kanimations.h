@@ -9,7 +9,7 @@
 #include <FastLED.h>
 
 #define FRAMES_PER_SECOND 60
-#define COOLING  55
+#define COOLING  70 // default: 55
 #define SPARKING 120
 #define NUM_LEDS 120
 
@@ -172,7 +172,7 @@ void ltrDot(CRGB leds[], int gTransform[], int ledNum)
 void Fire2012WithPalette(CRGB leds[])
 {
 // Array of temperature readings at each simulation cell
-// kw: Leaving some room at top for the darkness (20%)
+// kw: Leaving some room at top for the darkness (20%) - this is wrong.
   static uint8_t heat[int(NUM_LEDS*0.7)];
 
   // Step 1.  Cool down every cell a little
