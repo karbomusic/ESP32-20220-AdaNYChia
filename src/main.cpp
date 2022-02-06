@@ -5,24 +5,24 @@
 
             This is specifcally for the wide/skinny
             oled display as seen in readme.md.
-  
+
   File:      main.cpp
 
   Project:   <yourprojectname>
-             
-  Summary:   Project template that includes plumbing and code for 
+
+  Summary:   Project template that includes plumbing and code for
              a WiFi client + OTA updates via manual update.
              Automatic updates are not yet implemented but
              may be ported over from legacy projects.
 
              Architecture: ESP32 specific.
-            
+
   Config:    You must update secrets.h with your WiFi credentials
              and the hostname you choose for this device.
              Currently using Elegant OTA.
 
              Pre-deloyment configuration checklist:
-             
+
                 1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
                 2. Set <title> in htmlStrings.h
                 3. Set power max in main.cpp below (must match PSU used!).
@@ -62,13 +62,13 @@ Pre-deloyment configuration
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
 -------------------------------------------------------------------*/
-const int DATA_PIN = 5;
-const int NUM_LEDS = 300;
+const int DATA_PIN = 22;
+const int NUM_LEDS = 8;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 6000; // mA
+const int MAX_CURRENT = 500; // mA
 const int NUM_VOLTS = 5;
- 
+
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
 
@@ -99,6 +99,8 @@ unsigned long lastUpdate = 0;
 bool isSolidColor = false;
 Mode previousMode = Mode::Off;
 CHSV previousColor = CHSV(0, 0, 0);
+const int KNOB_PIN = 35;
+int lastKnobValue = 0;
 
 void setup()
 {
@@ -113,6 +115,7 @@ void setup()
     zUtils::getChipInfo();
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
+    pinMode(KNOB_PIN, INPUT);
 
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
@@ -171,8 +174,20 @@ void loop()
     /*--------------------------------------------------------------------
      Project specific loop code
     ---------------------------------------------------------------------*/
-    EVERY_N_MILLISECONDS(10)
+
+    EVERY_N_MILLISECONDS(1)
     {
+        int mVal = map(analogRead(KNOB_PIN), 0, 4095, 0, 255);
+        if (mVal != lastKnobValue)
+        {
+            if (abs(mVal - lastKnobValue) > 2) // faked smoothing (includes .1 UF cap on knob)
+            {
+                g_ledMode = Mode::Bright;
+                g_briteValue = mVal;
+                lastKnobValue = mVal;
+            }
+        }
+
         switch (g_ledMode) // switch  mode based on user input
         {
         case Mode::Animation:
@@ -224,7 +239,6 @@ void loop()
                 g_currentAnimation = "Solid Color";
                 previousColor = g_chsvColor;
                 g_chsvColor.v = getBrigtnessLimit();
-                Serial.println(g_chsvColor.v);
                 FastLED.showColor(g_chsvColor);
             }
             break;
@@ -241,7 +255,7 @@ void loop()
             break;
         }
     }
-    delay(5); //inhale
+    delay(1); // inhale
 }
 
 /*--------------------------------------------------------------------
@@ -251,9 +265,10 @@ void loop()
 
 // FastLED.showColor which I really need doesn't trigger the current limter code,
 // this is a workaround to calculate it for solid colors.
-uint8_t getBrigtnessLimit(){
-    return calculate_max_brightness_for_power_mW(leds, NUM_LEDS, 
-    g_chsvColor.v, calculate_unscaled_power_mW(leds, NUM_LEDS));
+uint8_t getBrigtnessLimit()
+{
+    return calculate_max_brightness_for_power_mW(leds, NUM_LEDS,
+                                                 g_chsvColor.v, calculate_unscaled_power_mW(leds, NUM_LEDS));
 }
 
 String checkSPIFFS()
