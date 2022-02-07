@@ -23,11 +23,13 @@
 
              Pre-deloyment configuration checklist:
 
-                1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
-                2. Set <title> in htmlStrings.h
-                3. Set power max in main.cpp below (must match PSU used!).
+                1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
+                2. Set <title> in htmlStrings.h and <h1> header on line 302
+                3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
                 4. Set hostName in secrets.h
                 5. Set ssid and password in secrets.h
+                6. Enable USE_BRITE_KNOB if using an analog brightness knob (GPIO35).
+                7. NEW: Set NUM_LEDS in Kanimations.h
 
   Brite Knob: You use a 10k Potentiometer to control the brightness
               of the LEDs. To eanble set #define BRITE_KNOB = 1
@@ -58,22 +60,21 @@
 
 /*-------------------------------------------------------------------
 Pre-deloyment configuration
-
 1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
-2. Set <title> in htmlStrings.h
+2. Set <title> in htmlStrings.h and <h1> header on line 302
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
 6. Enable USE_BRITE_KNOB if using an analog brightness knob (GPIO35).
 7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
-#define USE_BRITE_KNOB 1 // Use installed brite knob
+#define USE_BRITE_KNOB 0 // Use installed brite knob
 #define RND_PIN 34
 const int BRITE_KNOB_PIN = 35;
 const int DATA_PIN = 5;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 5000; // mA
+const int MAX_CURRENT = 6000; // mA
 const int NUM_VOLTS = 5;
 
 // #define USE_BRITE_KNOB 1 // Use installed brite knob
@@ -173,10 +174,6 @@ void printDisplayMessage(String msg)
 void loop()
 {
     random16_add_entropy(random(255));
-
-    
- 
-
     /*--------------------------------------------------------------------
         Update oled every interval with your text
     ---------------------------------------------------------------------*/

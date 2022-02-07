@@ -11,7 +11,7 @@
 #define FRAMES_PER_SECOND 60
 #define COOLING  70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 120
+#define NUM_LEDS 300
 
 // Structure for remebering a pixel's color.
 // Had to name to sLED due to some conflict
@@ -58,8 +58,7 @@ void randomDots2(CRGB leds[], int ledNum)
     leds[currentLEDNum] = CRGB::CornflowerBlue;
     FastLED.show();
     leds[currentLED.index] = CHSV(0, 0, 0);
-    FastLED.clear();
-    return;
+    fadeToBlackBy(leds, ledNum, 30);
 }
 
 void randomDots(CRGB leds[], int ledNum)
@@ -80,7 +79,7 @@ void randomNoise(CRGB leds[], int ledNum)
 {
     for (int i = 0; i < ledNum; i++)
     {
-        leds[i] = CHSV(random(255), random(100, 255), random(1, 255));
+        leds[i] = CHSV(random(255), random(120, 255), random(0, 255));
     }
     FastLED.show();
     FastLED.clear();
@@ -91,7 +90,7 @@ void randomPurpleJumper(CRGB leds[], int ledNum)
 {
     for (int i = 0; i < ledNum; i++)
     {
-        leds[i] = CHSV(random(127, 250), random(100, 255), random(1, 60));
+        leds[i] = CHSV(random(127, 250), random(140, 255), random(1, 130));
     }
     leds[random(ledNum)] = CRGB(255, 255, 255);
     FastLED.show();
@@ -103,7 +102,7 @@ void randomBlueJumper(CRGB leds[], int ledNum)
 {
     for (int i = 0; i < ledNum; i++)
     {
-        leds[i] = CHSV(random(86, 172), random(100, 255), random(1, 60));
+        leds[i] = CHSV(random(86, 172), random(140, 255), random(1, 130));
     }
     leds[random(ledNum)] = CRGB(255, 255, 255);
     FastLED.show();
@@ -173,7 +172,7 @@ void Fire2012WithPalette(CRGB leds[])
 {
 // Array of temperature readings at each simulation cell
 // kw: Leaving some room at top for the darkness (20%) - this is wrong.
-  static uint8_t heat[int(NUM_LEDS*0.7)];
+  static uint8_t heat[int(NUM_LEDS)];
 
   // Step 1.  Cool down every cell a little
     for( int i = 0; i < NUM_LEDS; i++) {

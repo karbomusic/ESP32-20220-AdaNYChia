@@ -71,8 +71,8 @@ const String index_html = R"rawliteral(
         }
 
         function setSwatch(value){
-            var request = makeHttpObject();
             updateSliders(value);
+            var request = makeHttpObject();
             request.open("GET", '?swat=' + value, false);
             request.onload = function(e){
                 if(request.status === 200)
