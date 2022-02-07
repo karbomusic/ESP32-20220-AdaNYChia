@@ -173,10 +173,6 @@ void printDisplayMessage(String msg)
 void loop()
 {
     random16_add_entropy(random(255));
-
-    
- 
-
     /*--------------------------------------------------------------------
         Update oled every interval with your text
     ---------------------------------------------------------------------*/
