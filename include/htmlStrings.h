@@ -347,8 +347,8 @@ const String index_html = R"rawliteral(
         <!-- <h2 style="text-align: center;">Animations</h2> -->
         <br>
         <div class="aniContainer">
-            <div class="center"><button class="button" onclick="setAnimation('1')">Random Dots</button></div>
-            <div class="center"><button class="button" onclick="setAnimation('2')">Random Dots 2</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('1')">Color Streams</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('2')">Random Dots</button></div>
             <div class="center"><button class="button" onclick="setAnimation('3')">Noise</button></div>
             <div class="center"><button class="button" onclick="setAnimation('4')">Blue Jumper</button></div>
             <div class="center"><button class="button" onclick="setAnimation('5')">Purple Jumper</button></div>

@@ -11,7 +11,7 @@
 #define FRAMES_PER_SECOND 100
 #define COOLING 70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 300
+#define NUM_LEDS 120
 
 // Structure for remebering a pixel's color.
 // Had to name to sLED due to some conflict
@@ -66,38 +66,19 @@ void randomDots2(CRGB leds[])
     FastLED.show();
     delay(20);
     leds[currentLEDNum] = CRGB::CornflowerBlue;
+    leds[random(NUM_LEDS - 1)] = CRGB::Red;
     FastLED.show();
     leds[currentLED.index] = CHSV(0, 0, 0);
-    fadeToBlackBy(leds, NUM_LEDS, 30);
+    fadeToBlackBy(leds, NUM_LEDS, 10);
 }
 
 int leds_done = 0;
+
 void randomDots(CRGB leds[])
 {
-    //     currentLEDNum = random(NUM_LEDS - 1);
-    //     sLED currentLED;
-    //     currentLED.index = currentLEDNum;
-    //     currentLED.H = random(255);
-    //     currentLED.S = random(255);
-    //     currentLED.V = random(32, 255);
-    //     leds[currentLEDNum] = CHSV(currentLED.H, currentLED.S, currentLED.V);
-    //     FastLED.show();
-    //     leds[currentLED.index] = CHSV(0, 0, 0);
-    //     FastLED.clear();
-
-    EVERY_N_MILLIS(100)
+    EVERY_N_MILLIS(20)
     {
-        CRGB Halloween_color = CRGB::Red;
-        // Pick a random color - skew toward red/orange/yellow part of the spectrum for extra creepyness
-        int m_red = random8(150, 255);
-        int m_blue = 0;
-        int m_green = random8(100);
-
-        int r = map(m_red, 0, 255, 0, g_briteValue);
-        int g = map(m_green, 0, 255, 0, g_briteValue);
-        int b = map(m_blue, 0, 255, 0, g_briteValue);
-
-        Halloween_color = CRGB(r, g, b);
+        CRGB Halloween_color;
 
         // shift pixels
         for (int i = NUM_LEDS - 1; i > 0; i--)
@@ -105,30 +86,47 @@ void randomDots(CRGB leds[])
             leds[i] = leds[i - 1];
         }
 
-        // reset?
-        EVERY_N_MILLIS_I(Dot_time, 500)
+        for (int i = random(int(NUM_LEDS/2)); i < random(int(NUM_LEDS/2), NUM_LEDS); i++)
         {
-            // This initally defaults to 20 seconds, but then will change the run
-            // period to a new random number of seconds from 10 and 30 seconds.
-            // You can name "timingObj" whatever you want.
-            Dot_time.setPeriod(random16(10, 30));
-            leds_done = 0;
+            leds[i] = CHSV(random(128,255), 255, random(0, 70));
         }
+        FastLED.show();
+        // reset?
+        // EVERY_N_MILLIS_I(duration, 500)
+        //  {
+        // This initally defaults to 20 seconds, but then will change the run
+        // period to a new random number of seconds from 10 and 30 seconds.
+        // You can name "timingObj" whatever you want.
+        // duration.setPeriod(random16(5, 10));
+        //  leds_done = 0;
+        //  }
 
         if (leds_done < NUM_LEDS)
         {
-
-            leds[0] = Halloween_color;
+            Halloween_color = CRGB(random(20, 200), 0, random(255));
+            leds[leds_done] = Halloween_color;
             leds_done = leds_done + 1;
-            // i=i+1; if (i>=3){i=0;}
         }
         else
         {
-            leds[0] = CRGB::Black;
+            leds[leds_done] = CRGB::Black;
+            leds_done = 0;
         }
 
-        FastLED.show(g_briteValue);
+        EVERY_N_MILLISECONDS(random(100, 1000))
+        {
+            leds[random(NUM_LEDS - 1)] = CRGB::CornflowerBlue;
+            FastLED.show();
+        }
+
+        EVERY_N_MILLISECONDS(random(223, 531))
+        {
+            leds[random(NUM_LEDS - 1)] = CRGB(random(255), random(255), random(255));
+        }
     }
+    leds[random(NUM_LEDS - 1)] = CRGB::Purple;
+    fadeToBlackBy(leds, NUM_LEDS, 20);
+    FastLED.show();
 }
 
 void randomNoise(CRGB leds[])

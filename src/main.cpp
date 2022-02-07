@@ -68,7 +68,7 @@ Pre-deloyment configuration
 6. Enable USE_BRITE_KNOB if using an analog brightness knob (GPIO35).
 7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
-#define USE_BRITE_KNOB 0 // Use installed brite knob
+#define USE_BRITE_KNOB 1 // Use installed brite knob
 #define RND_PIN 34
 const int BRITE_KNOB_PIN = 35;
 const int DATA_PIN = 5;

@@ -83,11 +83,11 @@ void startWebServer()
                           g_animationValue = 0;
                           break;
                       case 1:
-                          g_currentAnimation = "Random Dots";
+                          g_currentAnimation = "Color Streams";
                           g_animationValue = 1;
                           break;
                       case 2:
-                          g_currentAnimation = "Random Dots 2";
+                          g_currentAnimation = "Random Dots";
                           g_animationValue = 2;
                           break;
                       case 3:
