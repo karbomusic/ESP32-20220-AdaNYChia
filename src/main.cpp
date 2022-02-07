@@ -86,10 +86,9 @@ const int NUM_VOLTS = 5;
 // const int MAX_CURRENT = 4000; // mA
 // const int NUM_VOLTS = 5;
 
-CRGB leds[NUM_LEDS];
-int gLeds[NUM_LEDS];
-
 // template externs and globals
+extern CRGB leds[];
+extern int gLeds[];
 extern Adafruit_SSD1306 display;
 extern void startWifi();
 extern void startWebServer();
@@ -100,7 +99,7 @@ extern String globalIP;
 extern int g_lineHeight;
 
 // project specific externs and globals
-extern int *getLtrTransform(int leds[], int ledNum, int rows, int cols);
+extern int *getLtrTransform(int leds[], int rows, int cols);
 extern Mode g_ledMode = Mode::Off;
 extern uint8_t g_animationValue;
 extern uint8_t g_briteValue;
@@ -155,9 +154,10 @@ void setup()
     // Transposes pixels as needed. Set NUM_ROWS=1 for a single row strip.
     // When using an anmiation that cares about row order, pass gLeds[]
     // and leds[] to your animation, then use leds[gLeds[i]]
-    *gLeds = *getLtrTransform(gLeds, NUM_LEDS, NUM_ROWS, NUM_COLS);
+    // you only have to do this once in setup
+    *gLeds = *getLtrTransform(gLeds, NUM_ROWS, NUM_COLS);
 
-    // some fastl led built-ins for various FX.
+    // init some fastled built-ins for various FX.
     gPal = HeatColors_p;
 }
 
@@ -179,7 +179,6 @@ void loop()
     ---------------------------------------------------------------------*/
     EVERY_N_MILLISECONDS(250)
     {
-
         display.clearDisplay();
         display.setTextSize(1);
         display.setTextColor(WHITE);
@@ -216,35 +215,35 @@ void loop()
                 break;
 
             case 1:
-                randomDots(leds, NUM_LEDS);
+                randomDots(leds);
                 break;
 
             case 2:
-                randomDots2(leds, NUM_LEDS);
+                randomDots2(leds);
                 break;
 
             case 3:
-                randomNoise(leds, NUM_LEDS);
+                randomNoise(leds);
                 break;
 
             case 4:
-                randomBlueJumper(leds, NUM_LEDS);
+                randomBlueJumper(leds);
                 break;
 
             case 5:
-                randomPurpleJumper(leds, NUM_LEDS);
+                randomPurpleJumper(leds);
                 break;
 
             case 6:
-                dotScrollRandomColor(leds, gLeds, NUM_LEDS);
+                dotScrollRandomColor(leds, gLeds);
                 break;
 
             case 7:
-                flashColor(leds, NUM_LEDS, CRGB::OrangeRed);
+                flashColor(leds, CRGB::OrangeRed);
                 break;
 
             case 8:
-                ltrDot(leds, gLeds, NUM_LEDS);
+                ltrDot(leds, gLeds);
                 break;
 
             case 9:
@@ -299,8 +298,9 @@ void checkBriteKnob()
 }
 #endif
 
-// FastLED.showColor which I really need doesn't trigger the current limter code,
-// this is a workaround to calculate it for solid colors.
+// FastLED.showColor which I really need doesn't trigger the current bright 
+//limter code. This is a workaround to calculate it for solid colors so
+// we can limit max brightness in the SolidColor mode.
 uint8_t getBrigtnessLimit()
 {
     return calculate_max_brightness_for_power_mW(leds, NUM_LEDS,

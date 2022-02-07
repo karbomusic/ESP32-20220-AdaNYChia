@@ -36,9 +36,7 @@ String controlPanelHtml;
 AsyncWebServer server(80);
 
 // globals
-uint8_t g_animationValue = 0; // to inform loop which request was made (needs event).
-uint8_t g_briteValue = 255;   // used to inform loop of new brightness value.
-CHSV g_chsvColor(0, 0, 0);    // used to inform loop of new solid color.
+
 const char *g_currentAnimation = "Server ready...";
 
 // incoming parameters
