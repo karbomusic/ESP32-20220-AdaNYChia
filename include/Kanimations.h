@@ -11,7 +11,7 @@
 #define FRAMES_PER_SECOND 60
 #define COOLING  70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 120
+#define NUM_LEDS 300
 
 // Structure for remebering a pixel's color.
 // Had to name to sLED due to some conflict
@@ -172,7 +172,7 @@ void Fire2012WithPalette(CRGB leds[])
 {
 // Array of temperature readings at each simulation cell
 // kw: Leaving some room at top for the darkness (20%) - this is wrong.
-  static uint8_t heat[int(NUM_LEDS*0.7)];
+  static uint8_t heat[int(NUM_LEDS)];
 
   // Step 1.  Cool down every cell a little
     for( int i = 0; i < NUM_LEDS; i++) {
