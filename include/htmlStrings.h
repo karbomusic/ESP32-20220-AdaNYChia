@@ -299,7 +299,7 @@ const String index_html = R"rawliteral(
 
 <body>
     <div>
-        <h1 style="text-align: center;">Studio Floor Lighting</h1>
+        <h1 style="text-align: center;">Kitchen Lighting</h1>
         <div class="solidColorContainer">
             <div class="grid">
                 <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('72,61,137')"></button>

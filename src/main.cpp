@@ -60,7 +60,7 @@
 Pre-deloyment configuration
 
 1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
-2. Set <title> in htmlStrings.h
+2. Set <title> in htmlStrings.h and <h1> header on line 302
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
