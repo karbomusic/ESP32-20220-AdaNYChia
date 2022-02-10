@@ -31,8 +31,7 @@ const String index_html = R"rawliteral(
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED Man: Studio Floor</title>
-    <!-- <link href="styles.css" type="text/css" rel="stylesheet"> -->
+    <title>LED Man: Volta</title>
     <script type=text/javascript>
         function makeHttpObject()  {
             try { return new XMLHttpRequest(); }
@@ -44,7 +43,10 @@ const String index_html = R"rawliteral(
         }
 
         function setAnimation(value){
-            var request = makeHttpObject();
+          // if(!request)
+         //  { 
+               request = makeHttpObject();
+          // }
             request.open("GET", '?animation=' + value, false);
             request.onload = function(e){
                 if(request.status === 200)
@@ -72,7 +74,10 @@ const String index_html = R"rawliteral(
 
         function setSwatch(value){
             updateSliders(value);
-            var request = makeHttpObject();
+         //   if(!request)
+        //  { 
+               request = makeHttpObject();
+        //   }
             request.open("GET", '?swat=' + value, false);
             request.onload = function(e){
                 if(request.status === 200)
@@ -94,7 +99,10 @@ const String index_html = R"rawliteral(
             var h = document.getElementById("hue").value;
             var s = document.getElementById("sat").value;
             var v = document.getElementById("bri").value;       
-            var request = makeHttpObject();
+          //  if(!request)
+          //  { 
+               request = makeHttpObject();
+          //  }
             var querystring;
            
             if(sliderId==="bri") 
@@ -128,6 +136,9 @@ const String index_html = R"rawliteral(
             }
             request.send();
         }
+
+        // entry point
+        var request = makeHttpObject();
     </script>
     <style>
         body {
@@ -146,6 +157,15 @@ const String index_html = R"rawliteral(
         .center {
             margin-left: auto;
             margin-right: auto;
+        }
+
+        .unselectable {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         .solidColorContainer {
@@ -299,7 +319,7 @@ const String index_html = R"rawliteral(
 
 <body>
     <div>
-        <h1 style="text-align: center;">Studio Floor Lighting</h1>
+        <h1 style="text-align: center;">Ledman Volta</h1>
         <div class="solidColorContainer">
             <div class="grid">
                 <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('72,61,137')"></button>
@@ -338,11 +358,12 @@ const String index_html = R"rawliteral(
         </div>
         <br>
         <div class="hsvSlidecontainer">
-            Hue <input id="hue" type="range" onchange="setColor(this.id)" min="0" max="255" value="0" class="hueSlider">
-            Saturation <input id="sat" type="range" onchange="setColor(this.id)" min="0" max="255" value="255"
-                class="slider">
-            Brightness<input id="bri" type="range" onchange="setColor(this.id)" min="24" max="255" value="150"
-                class="slider">
+            <span class="unselectable">Hue</span> <input id="hue" type="range" oninput="setColor(this.id)" min="0"
+                max="255" value="0" class="hueSlider">
+            <span class="unselectable">Sat</span> <input id="sat" type="range" oninput="setColor(this.id)" min="0"
+                max="255" value="255" class="slider">
+            <span class="unselectable">Bri</span><input id="bri" type="range" onchange="setColor(this.id)" min="24"
+                max="255" value="150" class="slider">
         </div>
         <!-- <h2 style="text-align: center;">Animations</h2> -->
         <br>
