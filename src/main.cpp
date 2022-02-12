@@ -45,7 +45,17 @@
 
              List targets: pio run --list-targets
 
-  Kary Wall 1/20/2022.
+  PINS
+            USE_BRITE_KNOB 0        : Use installed brite knob
+            RND_PIN 34              : Random number seed from analog pin
+            BRITE_KNOB_PIN = 35     : Brightness knob
+            DATA_PIN = 5            : Data pin for the LED strip
+            COLOR_SELECT_PIN = 16   : Color selection button
+            HEAT_SCL_PIN = 32       : I2C SCL pin for temperature sensor
+            HEAT_SDA_PIN = 33       : I2C SDA pin for temperature sensor
+            OLED Display = 21, 22   : OLED pins for the LED strip
+
+  Kary Wall 2/11/2022.
 ===================================================================+*/
 
 #define FASTLED_INTERNAL // Quiets build noise
