@@ -31,7 +31,7 @@ const String index_html = R"rawliteral(
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED Man: Volta</title>
+    <title>LED Man: Volta Button</title>
     <script type=text/javascript>
         function makeHttpObject()  {
             try { return new XMLHttpRequest(); }
@@ -319,7 +319,7 @@ const String index_html = R"rawliteral(
 
 <body>
     <div>
-        <h1 style="text-align: center;">Ledman Volta</h1>
+        <h1 style="text-align: center;">Volta Button</h1>
         <div class="solidColorContainer">
             <div class="grid">
                 <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('72,61,137')"></button>

@@ -28,7 +28,7 @@
                 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
                 4. Set hostName in secrets.h
                 5. Set ssid and password in secrets.h
-                6. Enable USE_BRITE_KNOB if using an analog brightness knob (GPIO35).
+                6. Enable USE_HARDWARE_INPUT if using an analog brightness knob (GPIO35).
                 7. NEW: Set NUM_LEDS in Kanimations.h
 
   Brite Knob: You use a 10k Potentiometer to control the brightness
@@ -46,7 +46,7 @@
              List targets: pio run --list-targets
 
   PINS
-            USE_BRITE_KNOB 0        : Use installed brite knob
+            USE_HARDWARE_INPUT 0        : Use installed brite knob
             RND_PIN 34              : Random number seed from analog pin
             BRITE_KNOB_PIN = 35     : Brightness knob
             DATA_PIN = 5            : Data pin for the LED strip
@@ -75,19 +75,21 @@ Pre-deloyment configuration
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
 4. Set hostName in secrets.h
 5. Set ssid and password in secrets.h
-6. Enable USE_BRITE_KNOB if using an analog brightness knob (GPIO35).
+6. Enable USE_HARDWARE_INPUT if using an analog brightness knob (GPIO35).
 7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
-#define USE_BRITE_KNOB 0 // Use installed brite knob
-#define RND_PIN 34
+#define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
+#define USE_HARDWARE_INPUT 1 // Use installed brite knob
+const int RND_PIN = 34;
+const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
 const int DATA_PIN = 5;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 8000; // mA
+const int MAX_CURRENT = 500; // mA
 const int NUM_VOLTS = 5;
 
-// #define USE_BRITE_KNOB 1 // Use installed brite knob
+// #define USE_HARDWARE_INPUT 1 // Use installed brite knob
 // #define RND_PIN 34
 // const int BRITE_KNOB_PIN = 35;
 // const int DATA_PIN = 15;
@@ -123,11 +125,15 @@ void checkBriteKnob();
 
 // locals
 const int activityLED = 12;
-unsigned long lastUpdate = 0;
-bool isSolidColor = false;
+unsigned long lastButtonUpdate = 0;
 Mode previousMode = Mode::Off;
 CHSV previousColor = CHSV(0, 0, 0);
 int lastKnobValue = 0;
+int colorSelectPressed = 0;
+int colorSelectState = 0;
+int currentButtonColor = 0;
+CHSV buttonColors[] = {CHSV(0, 0, 225), CHSV(0, 0, 255), CHSV(28, 182, 225), CHSV(28, 182, 255),
+                       CHSV(164, 4, 255), CHSV(164, 4, 176), CHSV(72, 61, 255), CHSV(72, 61, 85)};
 
 void setup()
 {
@@ -143,6 +149,7 @@ void setup()
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
     pinMode(BRITE_KNOB_PIN, INPUT);
+    pinMode(COLOR_SELECT_PIN, INPUT);
 
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
@@ -201,7 +208,6 @@ void loop()
         display.setCursor(0, 25);
         display.println(g_currentAnimation);
         display.display();
-        lastUpdate = millis();
     }
     /*--------------------------------------------------------------------
      Project specific loop code
@@ -210,8 +216,24 @@ void loop()
     EVERY_N_MILLISECONDS(1)
     {
 
-#if USE_BRITE_KNOB
+// Use installed brite knob and color select button
+#if USE_HARDWARE_INPUT
         checkBriteKnob();
+        colorSelectPressed = digitalRead(COLOR_SELECT_PIN);
+        Serial.println(millis() - lastButtonUpdate);
+
+        if (colorSelectPressed == 1 && (millis() - lastButtonUpdate > 300))
+        {
+            Serial.println("HIGH");
+            g_chsvColor = buttonColors[currentButtonColor];
+            currentButtonColor += 1;
+            if (currentButtonColor >= ARRAY_LENGTH(buttonColors))
+            {
+                currentButtonColor = 0;
+            }
+            g_ledMode = Mode::SolidColor;
+            lastButtonUpdate = millis();
+        }
 #endif
 
         switch (g_ledMode) // switch  mode based on user input
@@ -268,8 +290,12 @@ void loop()
                 previousMode = Mode::SolidColor;
                 g_currentAnimation = "Solid Color";
                 previousColor = g_chsvColor;
-                g_chsvColor.v = getBrigtnessLimit();
-                FastLED.showColor(g_chsvColor);
+                // g_chsvColor.v = getBrigtnessLimit();
+                for (int i = 0; i < NUM_LEDS; i++)
+                {
+                    leds[i] = g_chsvColor;
+                }
+                FastLED.show();
             }
             break;
 
@@ -292,7 +318,7 @@ void loop()
      Project specific utility code (otherwise use zUtils.h)
      ** not currently used **
 ---------------------------------------------------------------------*/
-#if USE_BRITE_KNOB
+#if USE_HARDWARE_INPUT
 void checkBriteKnob()
 {
     int mVal = map(analogRead(BRITE_KNOB_PIN), 0, 4095, 0, 255);
@@ -308,11 +334,11 @@ void checkBriteKnob()
 }
 #endif
 
-// FastLED.showColor which I really need doesn't trigger the current bright 
-//limter code. This is a workaround to calculate it for solid colors so
+// FastLED.showColor which I really need doesn't trigger the current bright
+// limter code. This is a workaround to calculate it for solid colors so
 // we can limit max brightness in the SolidColor mode.
 uint8_t getBrigtnessLimit()
-{
+{ // not currently used because showColor flickers.
     return calculate_max_brightness_for_power_mW(leds, NUM_LEDS,
                                                  g_chsvColor.v, calculate_unscaled_power_mW(leds, NUM_LEDS));
 }
