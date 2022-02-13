@@ -60,7 +60,6 @@ String processor(const String &var)
 
 void startWebServer()
 {
-    // controlPanelHtml = getControlPanelHTML();
     Serial.println("mDNS responder started");
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
               {

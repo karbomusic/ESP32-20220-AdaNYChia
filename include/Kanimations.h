@@ -5,6 +5,9 @@
 
   Kary Wall 2022.
 ===================================================================+*/
+#define FASTLED_INTERRUPT_RETRY_COUNT 0 // required before #include
+#define FASTLED_ALLOW_INTERRUPTS 0
+
 #include <Arduino.h>
 #include <FastLED.h>
 

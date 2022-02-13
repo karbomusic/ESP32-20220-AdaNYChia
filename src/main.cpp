@@ -46,14 +46,15 @@
              List targets: pio run --list-targets
 
   PINS
-            USE_HARDWARE_INPUT 0        : Use installed brite knob
-            RND_PIN 34              : Random number seed from analog pin
-            BRITE_KNOB_PIN = 35     : Brightness knob
-            DATA_PIN = 5            : Data pin for the LED strip
-            COLOR_SELECT_PIN = 16   : Color selection button
-            HEAT_SCL_PIN = 32       : I2C SCL pin for temperature sensor
-            HEAT_SDA_PIN = 33       : I2C SDA pin for temperature sensor
-            OLED Display = 21, 22   : OLED pins for the LED strip
+            USE_HARDWARE_INPUT 1|0  : Enable brignt knob, temp meter, buttons etc.
+            RND_PIN 34              : Random number seed from analog pin.
+            BRITE_KNOB_PIN = 35     : Brightness knob.
+            DATA_PIN = 5            : Data pin for the LED strip.
+            COLOR_SELECT_PIN = 16   : Color selection button.
+            HEAT_SCL_PIN = 32       : I2C SCL pin for temperature sensor.
+            HEAT_SDA_PIN = 33       : I2C SDA pin for temperature sensor.
+            OLED SCL = 22           : OLED pins for the LED strip.
+            OLED SCA = 21           : ESP builtin SCA/SCL pins, don't assign in code!
 
   Kary Wall 2/11/2022.
 ===================================================================+*/
@@ -67,7 +68,15 @@
 #include <asyncWebServer.h>
 #include <FastLED.h>
 #include <oled.h>
+#include "MLX90615.h"
 
+// Heat sensor
+//#define SDA_PORT PORTC
+//#define SDA_PIN_TEMP 33
+//#define SCL_PORT PORTC
+//#define SCL_PIN_TEMP 32
+#define CALIBRATION_TEMP_MIN 0
+#define CALIBRATION_TEMP_MAX 1.9 // linear calaibration attempt because this one is off by 3-5 degrees F
 /*-------------------------------------------------------------------
 Pre-deloyment configuration
 1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
@@ -80,23 +89,18 @@ Pre-deloyment configuration
 -------------------------------------------------------------------*/
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
 #define USE_HARDWARE_INPUT 1 // Use installed brite knob
+
 const int RND_PIN = 34;
 const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
 const int DATA_PIN = 5;
+const int TEMP_SCL_PIN = 22;
+const int TEMP_SDA_PIN = 21;
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
 const int MAX_CURRENT = 500; // mA
 const int NUM_VOLTS = 5;
-
-// #define USE_HARDWARE_INPUT 1 // Use installed brite knob
-// #define RND_PIN 34
-// const int BRITE_KNOB_PIN = 35;
-// const int DATA_PIN = 15;
-// const int NUM_ROWS = 8;
-// const int NUM_COLS = 32;
-// const int MAX_CURRENT = 4000; // mA
-// const int NUM_VOLTS = 5;
+const float MAX_HEAT = 110.0; // F
 
 // template externs and globals
 extern CRGB leds[];
@@ -122,35 +126,41 @@ String checkSPIFFS();
 void printDisplayMessage(String msg);
 uint8_t getBrigtnessLimit();
 void checkBriteKnob();
+float celsiusToFahrenheit(float c);
 
 // locals
+MLX90615 mlx90615;
+int ledCoreTask = 0;
+static int ledTaskCore = 0;
+float temperature = 0.0;
+bool heatWarning = false;
 const int activityLED = 12;
 unsigned long lastButtonUpdate = 0;
-Mode previousMode = Mode::Off;
-CHSV previousColor = CHSV(0, 0, 0);
 int lastKnobValue = 0;
 int colorSelectPressed = 0;
 int colorSelectState = 0;
 int currentButtonColor = 0;
+Mode previousMode = Mode::Off;
+CHSV previousColor = CHSV(0, 0, 0);
 CHSV buttonColors[] = {CHSV(0, 0, 225), CHSV(0, 0, 255), CHSV(28, 182, 225), CHSV(28, 182, 255),
                        CHSV(164, 4, 255), CHSV(164, 4, 176), CHSV(72, 61, 255), CHSV(72, 61, 85)};
 
 void setup()
 {
     /*--------------------------------------------------------------------
-     Boot, Oled and I/O initialization.
+     Boot, OLED and I/O initialization.
     ---------------------------------------------------------------------*/
     Serial.begin(115200);
-    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
-    printDisplayMessage("Boot...");
     Serial.println();
     Serial.println("Booting...");
+    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
+    printDisplayMessage("Boot...");
     zUtils::getChipInfo();
+
     pinMode(activityLED, OUTPUT);
     digitalWrite(activityLED, LOW);
     pinMode(BRITE_KNOB_PIN, INPUT);
     pinMode(COLOR_SELECT_PIN, INPUT);
-
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
     ---------------------------------------------------------------------*/
@@ -162,6 +172,7 @@ void setup()
     /*--------------------------------------------------------------------
      Project specific setup code
     ---------------------------------------------------------------------*/
+    mlx90615.begin(TEMP_SDA_PIN, TEMP_SCL_PIN);
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
     FastLED.setBrightness(180);
@@ -196,18 +207,23 @@ void loop()
     ---------------------------------------------------------------------*/
     EVERY_N_MILLISECONDS(250)
     {
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-        display.setCursor(0, 0);
-        display.println(globalIP);
-        display.setCursor(0, 9);
-        display.println("Up: " + zUtils::getMidTime());
-        display.setCursor(0, 17);
-        display.println("Signal: " + String(WiFi.RSSI()) + " dBm");
-        display.setCursor(0, 25);
-        display.println(g_currentAnimation);
-        display.display();
+        // if (!heatWarning)
+        // {
+            display.clearDisplay();
+            display.setTextSize(1);
+            display.setTextColor(WHITE);
+            display.setCursor(0, 0);
+            display.println(globalIP);
+            display.setCursor(0, 9);
+            display.println("Up: " + zUtils::getMidTime());
+            display.setCursor(0, 17);
+            display.println("Signal: " + String(WiFi.RSSI()) + " dBm");
+            // display.setCursor(0, 25);
+            // display.println(g_currentAnimation);
+            display.setCursor(0, 25);
+            display.println("Temp:" + String(temperature) + " F");
+            display.display();
+       // }
     }
     /*--------------------------------------------------------------------
      Project specific loop code
@@ -220,8 +236,6 @@ void loop()
 #if USE_HARDWARE_INPUT
         checkBriteKnob();
         colorSelectPressed = digitalRead(COLOR_SELECT_PIN);
-        Serial.println(millis() - lastButtonUpdate);
-
         if (colorSelectPressed == 1 && (millis() - lastButtonUpdate > 300))
         {
             Serial.println("HIGH");
@@ -279,7 +293,7 @@ void loop()
                 break;
 
             case 9:
-                Fire2012WithPalette(leds); // if thsi works change all to NUM_LEDS
+                Fire2012WithPalette(leds);
                 break;
             }
             break;
@@ -290,7 +304,6 @@ void loop()
                 previousMode = Mode::SolidColor;
                 g_currentAnimation = "Solid Color";
                 previousColor = g_chsvColor;
-                // g_chsvColor.v = getBrigtnessLimit();
                 for (int i = 0; i < NUM_LEDS; i++)
                 {
                     leds[i] = g_chsvColor;
@@ -311,12 +324,51 @@ void loop()
             break;
         }
     }
-    delay(1); // inhale
+
+#if USE_HARDWARE_INPUT
+    
+    EVERY_N_SECONDS(5) // check temperature, throttle brightness if hot.
+    {
+        float ambTempF = celsiusToFahrenheit(mlx90615.get_ambient_temp() - CALIBRATION_TEMP_MAX);
+        float objTempF = celsiusToFahrenheit(mlx90615.get_object_temp() - CALIBRATION_TEMP_MAX);
+        temperature = ambTempF;
+        if (ambTempF > MAX_HEAT || objTempF > MAX_HEAT)
+        {
+            // dim leds
+            FastLED.setBrightness(30);
+            FastLED.show();
+
+            // oled warning
+            display.clearDisplay();
+            display.setTextSize(2);
+            display.setCursor(0, 0);
+            display.println("HOT!");
+            display.setCursor(0, 3);
+            display.println(String(objTempF) + " F");
+            display.display();
+            display.setTextSize(1); 
+
+            // console warning
+            Serial.println("HOT!");
+            Serial.println(String(objTempF) + " F");
+            heatWarning = true;
+            delay(10000);
+        }
+        else
+        {
+            heatWarning = false;
+            FastLED.setBrightness(g_briteValue);
+            FastLED.show();
+        }
+        Serial.println("Ambient: " + String(ambTempF) + " Object: " + String(objTempF));
+    }
+#endif
+
+    delay(1); // tiny inhale
 }
 
 /*--------------------------------------------------------------------
      Project specific utility code (otherwise use zUtils.h)
-     ** not currently used **
 ---------------------------------------------------------------------*/
 #if USE_HARDWARE_INPUT
 void checkBriteKnob()
@@ -337,8 +389,12 @@ void checkBriteKnob()
 // FastLED.showColor which I really need doesn't trigger the current bright
 // limter code. This is a workaround to calculate it for solid colors so
 // we can limit max brightness in the SolidColor mode.
+
+// NOTE 2/12/22: not currently used because FastLED.showColor() flickers terribly when changing brightness.
+// All this did was save me from the for loop to address all LEDs anyway.
+// But doing the loop myself seems just as fast and no flicker so bailing on this idea.
 uint8_t getBrigtnessLimit()
-{ // not currently used because showColor flickers.
+{
     return calculate_max_brightness_for_power_mW(leds, NUM_LEDS,
                                                  g_chsvColor.v, calculate_unscaled_power_mW(leds, NUM_LEDS));
 }
@@ -353,5 +409,36 @@ String checkSPIFFS()
     else
     {
         return "SPIFFS mounted OK.";
+    }
+}
+
+float celsiusToFahrenheit(float c)
+{
+    return (c * 9.0 / 5.0) + 32.0;
+}
+
+/*--------------------------------------------------------------------
+     Multi-threading for LEDS
+---------------------------------------------------------------------*/
+
+void createLedTask(TaskFunction_t pFunction)
+{
+    xTaskCreatePinnedToCore(
+        pFunction,    /* Function to implement the task */
+        "coreTask",   /* Name of the task */
+        10000,        /* Stack size in words */
+        NULL,         /* Task input parameter */
+        0,            /* Priority of the task */
+        NULL,         /* Task handle. */
+        ledTaskCore); /* Core where the task should run */
+
+    Serial.println("Task created...");
+}
+
+void ledTask(void *pvParameters)
+{
+    while (1)
+    {
+        // Serial.println("Task created...");
     }
 }
