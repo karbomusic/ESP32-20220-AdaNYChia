@@ -94,8 +94,8 @@ const int RND_PIN = 34;
 const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
 const int DATA_PIN = 5;
-const int TEMP_SCL_PIN = 22;
-const int TEMP_SDA_PIN = 21;
+const int TEMP_SCL_PIN = 22; // display and temp sensor
+const int TEMP_SDA_PIN = 21; // display and temp sensor
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
 const int MAX_CURRENT = 500; // mA
@@ -207,8 +207,8 @@ void loop()
     ---------------------------------------------------------------------*/
     EVERY_N_MILLISECONDS(250)
     {
-        // if (!heatWarning)
-        // {
+        if (!heatWarning)
+        {
             display.clearDisplay();
             display.setTextSize(1);
             display.setTextColor(WHITE);
@@ -223,7 +223,11 @@ void loop()
             display.setCursor(0, 25);
             display.println("Temp:" + String(temperature) + " F");
             display.display();
-       // }
+        }
+        else
+        {
+            return;
+        }
     }
     /*--------------------------------------------------------------------
      Project specific loop code
@@ -326,12 +330,12 @@ void loop()
     }
 
 #if USE_HARDWARE_INPUT
-    
+
     EVERY_N_SECONDS(5) // check temperature, throttle brightness if hot.
     {
         float ambTempF = celsiusToFahrenheit(mlx90615.get_ambient_temp() - CALIBRATION_TEMP_MAX);
         float objTempF = celsiusToFahrenheit(mlx90615.get_object_temp() - CALIBRATION_TEMP_MAX);
-        temperature = ambTempF;
+        temperature = objTempF;
         if (ambTempF > MAX_HEAT || objTempF > MAX_HEAT)
         {
             // dim leds
@@ -343,10 +347,10 @@ void loop()
             display.setTextSize(2);
             display.setCursor(0, 0);
             display.println("HOT!");
-            display.setCursor(0, 3);
+            display.setCursor(0, 15);
             display.println(String(objTempF) + " F");
             display.display();
-            display.setTextSize(1); 
+            display.setTextSize(1);
 
             // console warning
             Serial.println("HOT!");
