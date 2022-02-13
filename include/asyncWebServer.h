@@ -36,8 +36,7 @@ String controlPanelHtml;
 AsyncWebServer server(80);
 
 // globals
-
-const char *g_currentAnimation = "Server ready...";
+const char *g_currentAnimation = "Ready...";
 
 // incoming parameters
 const char *ANIMATION_PARAM = "animation";
