@@ -31,8 +31,19 @@
                 6. Enable USE_HARDWARE_INPUT if using an analog brightness knob (GPIO35).
                 7. NEW: Set NUM_LEDS in Kanimations.h
 
-  Brite Knob: You use a 10k Potentiometer to control the brightness
-              of the LEDs. To eanble set #define BRITE_KNOB = 1
+  Hardware:  If using bright knob, color switch button, temp sensor, set USE_HARDWARE_INPUT 1
+             Oled is always expected to be present.
+
+             OLED: SSD1306 128x32. SDA=21, SC=22 
+             Bright Knob: Use a 10k Potentiometer to control the brightness
+                          of the LEDs with .1 uf cap on lugs 1(gnd) and 2 (data).
+
+             Temp Sensor: MLX90615. SDA=21, SCL=21 (same buss as oled)
+             Color Button:   
+                                  ____
+                            3v3<-|    |->NC
+                                 | () |
+                       GND<-10k<-|____|->DATA
 
   Building:  pio run -t <target> -e envName
 
@@ -51,8 +62,8 @@
             BRITE_KNOB_PIN = 35     : Brightness knob.
             DATA_PIN = 5            : Data pin for the LED strip.
             COLOR_SELECT_PIN = 16   : Color selection button.
-            HEAT_SCL_PIN = 32       : I2C SCL pin for temperature sensor.
-            HEAT_SDA_PIN = 33       : I2C SDA pin for temperature sensor.
+            HEAT_SCL_PIN = 22       : I2C SCL pin for temperature sensor.
+            HEAT_SDA_PIN = 21       : I2C SDA pin for temperature sensor.
             OLED SCL = 22           : OLED pins for the LED strip.
             OLED SCA = 21           : ESP builtin SCA/SCL pins, don't assign in code!
 
@@ -144,7 +155,7 @@ int currentButtonColor = 0;
 Mode previousMode = Mode::Off;
 CHSV previousColor = CHSV(0, 0, 0);
 CHSV buttonColors[] = {CHSV(0, 0, 225), CHSV(0, 0, 255), CHSV(28, 182, 225), CHSV(28, 182, 255),
-                       CHSV(164, 4, 255), CHSV(164, 4, 176), CHSV(72, 61, 255), CHSV(72, 61, 85)};
+                       CHSV(164, 4, 255), CHSV(164, 4, 176), CHSV(72, 61, 255), CHSV(72, 61, 85), previousColor, CHSV(0, 0, 0)};
 
 void setup()
 {
