@@ -34,12 +34,12 @@
   Hardware:  If using bright knob, color switch button, temp sensor, set USE_HARDWARE_INPUT 1
              Oled is always expected to be present.
 
-             OLED: SSD1306 128x32. SDA=21, SC=22 
+             OLED: SSD1306 128x32. SDA=21, SC=22
              Bright Knob: Use a 10k Potentiometer to control the brightness
                           of the LEDs with .1 uf cap on lugs 1(gnd) and 2 (data).
 
              Temp Sensor: MLX90615. SDA=21, SCL=21 (same buss as oled)
-             Color Button:   
+             Color Button:
                                   ____
                             3v3<-|    |->NC
                                  | () |
@@ -71,6 +71,7 @@
 ===================================================================+*/
 
 #define FASTLED_INTERNAL // Quiets build noise
+#include <appGlobals.h>
 #include <Arduino.h>
 #include "SPIFFS.h"
 #include <zUtils.h>
@@ -99,19 +100,21 @@ Pre-deloyment configuration
 7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
-#define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.)
-
+#define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.
 const int RND_PIN = 34;
 const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
+const int FAN_PIN = 33;
 const int DATA_PIN = 5;
 const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 500; // mA
+const int MAX_CURRENT = 8000; // mA
 const int NUM_VOLTS = 5;
-const float MAX_HEAT = 110.0; // F
+const float MAX_HEAT = 140.0; // F
+const float SAFE_HEAT = 110; // for hysterisis
+const float FAN_HEAT = 100.0; // F
 
 // Template external and globals
 extern CRGB leds[];
@@ -173,6 +176,8 @@ void setup()
     digitalWrite(activityLED, LOW);
     pinMode(BRITE_KNOB_PIN, INPUT);
     pinMode(COLOR_SELECT_PIN, INPUT);
+    pinMode(FAN_PIN, OUTPUT);
+    digitalWrite(FAN_PIN, LOW);
 
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
@@ -350,41 +355,72 @@ void loop()
 
 #if USE_HARDWARE_INPUT
 
-    EVERY_N_SECONDS(5) // check temperature, throttle brightness if hot.
+    EVERY_N_SECONDS(5) 
     {
+        // Check temperature
+    retry:
         float ambTempF = celsiusToFahrenheit(mlx90615.get_ambient_temp() - CALIBRATION_TEMP_MAX);
         float objTempF = celsiusToFahrenheit(mlx90615.get_object_temp() - CALIBRATION_TEMP_MAX);
         objTemp = objTempF;
         ambTemp = ambTempF;
-        if (ambTempF > MAX_HEAT || objTempF > MAX_HEAT)
+
+        // If warm enough, turn on fan
+        if (ambTempF > FAN_HEAT || objTempF > FAN_HEAT)
         {
-            // dim leds
-            FastLED.setBrightness(30);
-            FastLED.show();
+            digitalWrite(FAN_PIN, HIGH);
+        }
+        else
+        {
+            digitalWrite(FAN_PIN, LOW);
+        }
 
-            // oled warning
-            display.clearDisplay();
-            display.setTextSize(2);
-            display.setCursor(0, 0);
-            display.println("HOT!");
-            display.setCursor(0, 15);
-            display.println(String(objTempF) + " F");
-            display.display();
-            display.setTextSize(1);
-
-            // console warning
-            Serial.println("HOT!");
-            Serial.println(String(objTempF) + " F");
+        // hysterisis for heat warning mode recovery
+        if ((ambTempF > SAFE_HEAT || objTempF > SAFE_HEAT) && heatWarning)
+        {
             heatWarning = true;
-            delay(10000);
         }
         else
         {
             heatWarning = false;
+        }
+
+        // If too hot, knock down brightess, go into heat warning mode
+        // in a 10 second loop until cool again.
+        if (ambTempF > MAX_HEAT || objTempF > MAX_HEAT || heatWarning)
+        {
+            heatWarning = true;
+            FastLED.setBrightness(15);
+            g_briteValue = g_briteValue * 0.7; 
+            FastLED.show();
+            digitalWrite(FAN_PIN, HIGH);  //should already be on by now.
+
+            for (int i = 10; i > 0; i--)
+            {
+                // oled warning
+                display.clearDisplay();
+                display.setTextSize(2);
+                display.setCursor(0, 0);
+                display.println("HOT! " + String(i));
+                display.setCursor(0, 16);
+                display.println(String(objTempF) + " F");
+                display.display();
+                display.setTextSize(1);
+
+                // console warning
+                Serial.println("HOT!" + String(i));
+                Serial.println(String(objTempF) + " F");
+                delay(1000);
+            }
+
+            goto retry;
+        }
+        else
+        {
             FastLED.setBrightness(g_briteValue);
             FastLED.show();
         }
-        // Serial.println("Ambient: " + String(ambTempF) + " Object: " + String(objTempF));
+
+        g_temperature = "Ambient: " + String(ambTempF) + " Object: " + String(objTempF);
     }
 #endif
 
