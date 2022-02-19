@@ -66,6 +66,7 @@
             HEAT_SDA_PIN = 21       : I2C SDA pin for temperature sensor.
             OLED SCL = 22           : OLED pins for the LED strip.
             OLED SCA = 21           : ESP builtin SCA/SCL pins, don't assign in code!
+            FAN_PIN = 33            : PWM controlled heat fan pin.
 
   Kary Wall 2/11/2022.
 ===================================================================+*/
@@ -104,7 +105,6 @@ Pre-deloyment configuration
 const int RND_PIN = 34;
 const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
-const int FAN_PIN = 33;
 const int DATA_PIN = 5;
 const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
@@ -112,6 +112,13 @@ const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
 const int MAX_CURRENT = 8000;  // mA
 const int NUM_VOLTS = 5;
+
+// Heat management
+const int FAN_PIN = 33;
+const int FAN_CHANNEL = 0;
+const int FAN_FREQ = 5000;
+const int FAN_RES = 8;
+const int FAN_SPEED = 220;
 const float MAX_HEAT = 130.0;  // F
 const float SAFE_HEAT = 110.0; // for hysterisis
 const float FAN_HEAT = 100.0;  // F
@@ -176,9 +183,10 @@ void setup()
     digitalWrite(activityLED, LOW);
     pinMode(BRITE_KNOB_PIN, INPUT);
     pinMode(COLOR_SELECT_PIN, INPUT);
-    pinMode(FAN_PIN, OUTPUT);
-    digitalWrite(FAN_PIN, LOW);
 
+    ledcSetup(FAN_CHANNEL, FAN_FREQ, FAN_RES);
+    ledcAttachPin(FAN_PIN, FAN_CHANNEL);
+    ledcWrite(FAN_CHANNEL, 0);
     /*--------------------------------------------------------------------
      Start WiFi & OTA HTTP update server
     ---------------------------------------------------------------------*/
@@ -367,11 +375,11 @@ void loop()
         // If warm enough, turn on fan
         if (ambTempF > FAN_HEAT || objTempF > FAN_HEAT)
         {
-            digitalWrite(FAN_PIN, HIGH);
+            ledcWrite(FAN_CHANNEL, FAN_SPEED);
         }
         else
         {
-            digitalWrite(FAN_PIN, LOW);
+            ledcWrite(FAN_CHANNEL, 0);
         }
 
         // hysterisis for heat warning mode recovery
@@ -392,7 +400,7 @@ void loop()
             FastLED.setBrightness(15);
             g_briteValue = g_briteValue * 0.7;
             FastLED.show();
-            digitalWrite(FAN_PIN, HIGH); // should already be on by now.
+            ledcWrite(FAN_CHANNEL, FAN_SPEED); // should already be on by now.
 
             for (int i = 10; i > 0; i--)
             {
