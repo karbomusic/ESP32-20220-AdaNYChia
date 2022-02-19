@@ -5,13 +5,16 @@
 
   Kary Wall 2022.
 ===================================================================+*/
+//#define FASTLED_INTERRUPT_RETRY_COUNT 0 // required before #include
+//#define FASTLED_ALLOW_INTERRUPTS 0
+
 #include <Arduino.h>
 #include <FastLED.h>
 
 #define FRAMES_PER_SECOND 100
 #define COOLING 70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 7
+#define NUM_LEDS 300
 
 // Structure for remebering a pixel's color.
 struct sLED

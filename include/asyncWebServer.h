@@ -36,8 +36,7 @@ String controlPanelHtml;
 AsyncWebServer server(80);
 
 // globals
-
-const char *g_currentAnimation = "Server ready...";
+const char *g_currentAnimation = "Ready...";
 
 // incoming parameters
 const char *ANIMATION_PARAM = "animation";
@@ -60,7 +59,6 @@ String processor(const String &var)
 
 void startWebServer()
 {
-    // controlPanelHtml = getControlPanelHTML();
     Serial.println("mDNS responder started");
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
               {
@@ -212,6 +210,7 @@ void handleAbout(AsyncWebServerRequest *request)
 {
     bangLED(HIGH);
     String aboutResponse = "<head><style type=\"text/css\">.button:active{background-color:#cccccc;color:#111111}></style><head>"
+                           "<meta http-equiv=\"refresh\" content=\"10\"/>"
                            "<body style=\"background-color:#141d27;color:#dddddd;font-family:arial\"><b>[About ESP32]</b><br><br>"
                            "<b>Device Family:</b> " +
                            deviceFamily + "<br>"
@@ -241,6 +240,8 @@ void handleAbout(AsyncWebServerRequest *request)
                            description + "<br>"
                                          "<b>Uptime:</b> " +
                            zUtils::getMidTime() + "<br>"
+                                         "<b>Temperature:</b> " +
+                           g_temperature + "<br>"
                                                   "<b>Update:</b> http://" +
                            hostName + ".ra.local/update<br><br>"
                                       "<button class=\"button\" style=\"width:100px;height:30px;border:0;background-color:#3c5168;color:#dddddd\" onclick=\"window.location.href='/restart'\">Restart</button></body>"
