@@ -110,11 +110,11 @@ const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 8000; // mA
+const int MAX_CURRENT = 8000;  // mA
 const int NUM_VOLTS = 5;
-const float MAX_HEAT = 140.0; // F
-const float SAFE_HEAT = 110; // for hysterisis
-const float FAN_HEAT = 100.0; // F
+const float MAX_HEAT = 130.0;  // F
+const float SAFE_HEAT = 110.0; // for hysterisis
+const float FAN_HEAT = 100.0;  // F
 
 // Template external and globals
 extern CRGB leds[];
@@ -355,7 +355,7 @@ void loop()
 
 #if USE_HARDWARE_INPUT
 
-    EVERY_N_SECONDS(5) 
+    EVERY_N_SECONDS(5)
     {
         // Check temperature
     retry:
@@ -390,9 +390,9 @@ void loop()
         {
             heatWarning = true;
             FastLED.setBrightness(15);
-            g_briteValue = g_briteValue * 0.7; 
+            g_briteValue = g_briteValue * 0.7;
             FastLED.show();
-            digitalWrite(FAN_PIN, HIGH);  //should already be on by now.
+            digitalWrite(FAN_PIN, HIGH); // should already be on by now.
 
             for (int i = 10; i > 0; i--)
             {
