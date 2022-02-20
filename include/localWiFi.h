@@ -64,7 +64,6 @@ void startWifi()
     Serial.println("Device Family: " + deviceFamily);
     Serial.println("Chip ID:" + String(zUtils::getChipID()));
     Serial.println("-------------------------------------\n");
-    globalIP = WiFi.localIP().toString();
 
     // use mdns for host name resolution
     if (!MDNS.begin(hostName.c_str()))
@@ -75,9 +74,10 @@ void startWifi()
             delay(1000);
         }
     }
-    
+
     Serial.println("mDNS responder started...");
     mdns_hostname_set(hostName.c_str());
+    globalIP = WiFi.localIP().toString();
 }
 
 bool isWiFiConnected()
