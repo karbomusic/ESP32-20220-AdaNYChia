@@ -84,14 +84,11 @@
 #include "MLX90615.h"
 
 // Heat sensor
-//#define SDA_PORT PORTC
-//#define SDA_PIN_TEMP 33
-//#define SCL_PORT PORTC
-//#define SCL_PIN_TEMP 32
 #define CALIBRATION_TEMP_MIN 0
 #define CALIBRATION_TEMP_MAX 1.9 // linear calaibration attempt because this one is off by 3-5 degrees F
 /*-------------------------------------------------------------------
-Pre-deloyment configuration
+              [Pre-deloyment configuration]
+
 1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
 2. Set <title> in htmlStrings.h and <h1> header on line 302
 3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
@@ -101,7 +98,7 @@ Pre-deloyment configuration
 7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
-#define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.
+#define USE_HARDWARE_INPUT 0 // Use installed hardware (knob, temp, buttons etc.
 const int RND_PIN = 34;
 const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
@@ -110,7 +107,7 @@ const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 8000;  // mA
+const int MAX_CURRENT = 2500; // mA
 const int NUM_VOLTS = 5;
 
 // Heat management
@@ -164,8 +161,8 @@ int colorSelectPressed = 0;
 int currentButtonColor = 0;
 Mode previousMode = Mode::Off;
 CHSV previousColor = CHSV(0, 0, 0);
-CHSV buttonColors[] = {CHSV(0, 0, 225), CHSV(0, 0, 255), CHSV(28, 182, 225), CHSV(28, 182, 255),
-                       CHSV(164, 4, 255), CHSV(164, 4, 176), CHSV(72, 61, 255), CHSV(72, 61, 85), previousColor, CHSV(0, 0, 0)};
+CHSV buttonColors[] = {CHSV(85,76,254), CHSV(0, 0, 255), CHSV(28, 182, 225), CHSV(28, 182, 255),
+                       CHSV(164, 4, 255), CHSV(164, 4, 176), CHSV(85,61,254), CHSV(72, 61, 85), previousColor, CHSV(0, 0, 0)};
 
 void setup()
 {
@@ -202,6 +199,7 @@ void setup()
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
     FastLED.setBrightness(180);
+    FastLED.setCorrection(Halogen);
     pinMode(RND_PIN, INPUT);
     randomSeed(analogRead(RND_PIN));
 
@@ -212,6 +210,8 @@ void setup()
 
     // init some fastled built-in palletes for various FX.
     gPal = HeatColors_p;
+    currentPalette = RainbowColors_p;
+    targetPalette = OceanColors_p;
 }
 
 void printDisplayMessage(String msg)
@@ -332,7 +332,24 @@ void loop()
             case 9:
                 Fire2012WithPalette(leds);
                 break;
+
+            case 10:
+                beatWaver(leds);
+                break;
+
+            case 11:
+                redOcean(leds);
+                break;
+
+            case 12:
+                inchWorm(leds);
+                break;
+
+            case 13:
+                starTwinkle(leds);
+                break;
             }
+
             break;
 
         case Mode::SolidColor:

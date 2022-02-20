@@ -116,6 +116,22 @@ void startWebServer()
                           g_currentAnimation = "Campfire";
                           g_animationValue = 9;
                           break;
+                      case 10:
+                          g_currentAnimation = "Color Waves";
+                          g_animationValue = 10;
+                          break;
+                      case 11:
+                          g_currentAnimation = "Red Ocean";
+                          g_animationValue = 11;
+                          break;
+                      case 12:
+                          g_currentAnimation = "Inchworm";
+                          g_animationValue = 12;
+                          break;
+                      case 13:
+                          g_currentAnimation = "Twinkle Stars";
+                          g_animationValue = 13;
+                          break;
                       default:
                           g_currentAnimation = "Lights Out";
                           g_animationValue = 0;
@@ -240,9 +256,9 @@ void handleAbout(AsyncWebServerRequest *request)
                            description + "<br>"
                                          "<b>Uptime:</b> " +
                            zUtils::getMidTime() + "<br>"
-                                         "<b>Temperature:</b> " +
+                                                  "<b>Temperature:</b> " +
                            g_temperature + "<br>"
-                                                  "<b>Update:</b> http://" +
+                                           "<b>Update:</b> http://" +
                            hostName + ".ra.local/update<br><br>"
                                       "<button class=\"button\" style=\"width:100px;height:30px;border:0;background-color:#3c5168;color:#dddddd\" onclick=\"window.location.href='/restart'\">Restart</button></body>"
                                       "&nbsp;&nbsp;<button class=\"button\" style=\"width:100px;height:30px;border:0;background-color:#3c5168;color:#dddddd\" onclick=\"window.location.href='/update'\">Update</button></body>";

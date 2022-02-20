@@ -17,7 +17,7 @@
 
 String ssid = STASSID;                         // WiFi ssid
 String password = STAPSK;                      // WiFi password
-String hostName = "ledman-kitchen";             // hostname as seen on network
+String hostName = "ledman-volta";             // hostname as seen on network
 String softwareVersion = "2.20.22";             // used for about page
 String deviceFamily = "ESP32-ELOTA-Matrix";    // used for about page
 String description = "I'm a led matrix baby."; // used for about page
