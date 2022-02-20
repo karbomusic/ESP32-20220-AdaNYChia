@@ -276,6 +276,7 @@ void loop()
         if (colorSelectPressed == 1 && (millis() - lastButtonUpdate > 300))
         {
             g_chsvColor = buttonColors[currentButtonColor];
+            g_briteValue = buttonColors[currentButtonColor].v;
             currentButtonColor += 1;
             if (currentButtonColor >= ARRAY_LENGTH(buttonColors))
             {
