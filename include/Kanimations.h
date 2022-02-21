@@ -3,7 +3,7 @@
 
   Summary:   Simple FastLED pixel animation testing.
 
-  Kary Wall 2022.
+  Kary Wall 2/20/22.
 ===================================================================+*/
 //#define FASTLED_INTERRUPT_RETRY_COUNT 0 // required before #include
 //#define FASTLED_ALLOW_INTERRUPTS 0
@@ -14,7 +14,7 @@
 #define FRAMES_PER_SECOND 100
 #define COOLING 70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 286
+#define NUM_LEDS 281
 
 // Structure for remebering a pixel's color.
 struct sLED
@@ -42,11 +42,19 @@ CHSV g_chsvColor(0, 0, 0);    // used to inform loop of new solid color.
 
 // prototypes
 int *getLtrTransform(int leds[], int rows, int cols);
+void beatwave();
+void inoise8_mover();
 
+// locals
 sLED previousLED;
 int currentLEDNum = 0;
 CRGBPalette16 gPal;
 bool gReverseDirection = false;
+
+// pallettes
+CRGBPalette16 currentPalette;
+CRGBPalette16 targetPalette;
+TBlendType currentBlending;
 
 void clearLeds()
 {
@@ -88,9 +96,9 @@ void randomDots(CRGB leds[])
             leds[i] = leds[i - 1];
         }
 
-        for (int i = random(int(NUM_LEDS/2)); i < random(int(NUM_LEDS/2), NUM_LEDS); i++)
+        for (int i = random(int(NUM_LEDS / 2)); i < random(int(NUM_LEDS / 2), NUM_LEDS); i++)
         {
-            leds[i] = CHSV(random(128,255), 255, random(0, 70));
+            leds[i] = CHSV(random(128, 255), 255, random(0, 70));
         }
         FastLED.show();
         // reset?
@@ -166,6 +174,60 @@ void randomBlueJumper(CRGB leds[])
     return;
 }
 
+void redOcean(CRGB leds[])
+{
+    for (int i = 0; i < NUM_LEDS; i++)
+    {
+        leds[i] = CHSV(random(232, 255), random(160, 255), random(1, 130));
+    }
+    leds[random(NUM_LEDS)] = CRGB(255, 255, 255);
+    FastLED.show();
+    FastLED.clear();
+    return;
+}
+
+/*--------------------------------------------------------------------
+   Moving Noise
+---------------------------------------------------------------------*/
+
+uint16_t xscale = 30;
+uint16_t yscale = 30;
+uint8_t maxChanges = 24;
+static int16_t dist = random16(12345);
+
+void inchWorm(CRGB leds[])
+{
+    static CRGBPalette16 cPalette = LavaColors_p;
+    static CRGBPalette16 tPalette = OceanColors_p;
+
+    EVERY_N_MILLISECONDS(10)
+    {
+        nblendPaletteTowardPalette(cPalette, tPalette, maxChanges); // AWESOME palette blending capability.
+        inoise8_mover();                                            // Update the LED array with noise at the new location
+        fadeToBlackBy(leds, NUM_LEDS, 4);
+    }
+
+    EVERY_N_SECONDS(5)
+    { // Change the target palette to a random one every 5 seconds.
+        tPalette = CRGBPalette16(CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 192, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)));
+    }
+
+    EVERY_N_SECONDS(random(10, 35))
+    {
+        for (int i = 0; i < random(10, 30); i++)
+        {
+            leds[random(NUM_LEDS)] = CHSV(0, 0, 255);
+            FastLED.delay(50);
+        }
+    }
+
+    FastLED.show();
+}
+
+/*--------------------------------------------------------------------
+   Color Strobe
+---------------------------------------------------------------------*/
+
 void flashColor(CRGB leds[], int color)
 {
     // forcing color random for now
@@ -181,6 +243,85 @@ void flashColor(CRGB leds[], int color)
         FastLED.clear();
         FastLED.show();
     }
+}
+
+/*--------------------------------------------------------------------
+   Start Twinkle (unhack me please)
+---------------------------------------------------------------------*/
+
+void starTwinkle(CRGB leds[])
+{
+    EVERY_N_MILLISECONDS(11)
+    {
+        static uint8_t position;
+        static uint8_t direction;
+        int rand = random(NUM_LEDS);
+        leds[rand] = CHSV(0, 0, 255);
+
+        if (rand % 3 == 0)
+        {
+            leds[rand] = CRGB::DarkOrange;
+        }
+        else if (rand == position)
+        {
+            leds[rand] = CRGB::Red;
+        }
+
+        leds[position] = CHSV(166, 255, 200);
+
+        if (position == 0 && direction == 1)
+        {
+            direction = 0;
+        }
+        else if (position == NUM_LEDS - 1 && direction == 0)
+        {
+            direction = 1;
+        }
+
+        if (direction == 0)
+        {
+            position++;
+        }
+        else if (direction == 1)
+        {
+            position--;
+        }
+
+        EVERY_N_SECONDS(10)
+        {
+            leds[random(NUM_LEDS)] = CRGB::Red;
+        }
+
+        EVERY_N_MILLISECONDS_I(duration, 1000)
+        {
+            direction = !direction;
+            duration.setPeriod(random16(100, 3000));
+        }
+
+        fadeToBlackBy(leds, NUM_LEDS, 8);
+        FastLED.show();
+    }
+}
+/*--------------------------------------------------------------------
+   BeatWaver
+---------------------------------------------------------------------*/
+void beatWaver(CRGB leds[])
+{
+    currentBlending = LINEARBLEND;
+    beatwave();
+
+    EVERY_N_MILLISECONDS(100)
+    {
+        uint8_t maxChanges = 24;
+        nblendPaletteTowardPalette(currentPalette, targetPalette, maxChanges); // AWESOME palette blending capability.
+    }
+
+    EVERY_N_SECONDS(5)
+    { // Change the target palette to a random one every 5 seconds.
+        targetPalette = CRGBPalette16(CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 192, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)));
+    }
+
+    FastLED.show();
 }
 
 void dotScrollRandomColor(CRGB leds[], int gTransform[])
@@ -337,4 +478,27 @@ int *getLtrTransform(int leds[], int rows, int cols)
         leds[i] = mappedVal;
     }
     return leds;
+}
+
+void beatwave()
+{
+
+    uint8_t wave1 = beatsin8(9, 0, 255); // That's the same as beatsin8(9);
+    uint8_t wave2 = beatsin8(8, 0, 255);
+    uint8_t wave3 = beatsin8(7, 0, 255);
+    uint8_t wave4 = beatsin8(6, 0, 255);
+
+    for (int i = 0; i < NUM_LEDS; i++)
+    {
+        leds[i] = ColorFromPalette(currentPalette, i + wave1 + wave2 + wave3 + wave4, 255, currentBlending);
+    }
+
+}
+
+void inoise8_mover()
+{
+    uint8_t locn = inoise8(xscale, dist + yscale) % 255;                       // Get a new pixel location from moving noise.
+    uint8_t pixlen = map(locn, 0, 255, 0, NUM_LEDS);                           // Map that to the length of the strand.
+    leds[pixlen] = ColorFromPalette(currentPalette, pixlen, 255, LINEARBLEND); // Use that value for both the location as well as the palette index colour for the pixel.
+    dist += beatsin8(10, 1, 4); // Moving along the distance (that random number we started out with). Vary it a bit with a sine wave.
 }

@@ -12,7 +12,7 @@
              you're deploying firmware to a new device. It just
              creates extra deployment steps.
              
-  Kary Wall 2/3/2022.
+  Kary Wall 2/20/2022.
 ===================================================================+*/
 
 #include <Arduino.h>
@@ -43,10 +43,10 @@ const String index_html = R"rawliteral(
         }
 
         function setAnimation(value){
-          // if(!request)
-         //  { 
+          if(!request)
+          { 
                request = makeHttpObject();
-          // }
+          }
             request.open("GET", '?animation=' + value, false);
             request.onload = function(e){
                 if(request.status === 200)
@@ -70,14 +70,17 @@ const String index_html = R"rawliteral(
             var hSlider = document.getElementById("hue").value = values[0];
             var sSlider = document.getElementById("sat").value = values[1];
             var vSlider = document.getElementById("bri").value = values[2];
+            document.getElementById("hue-text").innerHTML = "Hue: " + hSlider;
+            document.getElementById("sat-text").innerHTML = "Sat: " + sSlider;
+            document.getElementById("bri-text").innerHTML = "Bri: " + vSlider;
         }
 
         function setSwatch(value){
-            updateSliders(value);
-         //   if(!request)
-        //  { 
+           updateSliders(value);
+           if(!request)
+           { 
                request = makeHttpObject();
-        //   }
+           }
             request.open("GET", '?swat=' + value, false);
             request.onload = function(e){
                 if(request.status === 200)
@@ -98,23 +101,27 @@ const String index_html = R"rawliteral(
         function setColor(sliderId){
             var h = document.getElementById("hue").value;
             var s = document.getElementById("sat").value;
-            var v = document.getElementById("bri").value;       
-          //  if(!request)
-          //  { 
+            var v = document.getElementById("bri").value;    
+
+           if(!request)
+           { 
                request = makeHttpObject();
-          //  }
+           }
             var querystring;
            
             if(sliderId==="bri") 
             { 
+                document.getElementById("bri-text").innerHTML = "Bri: " + v;
                 request.open("GET", '?bri=' + v, false); // brightness is global 
             }
             else if(sliderId==="sat")
             {
+                document.getElementById("sat-text").innerHTML = "Sat: " + s;
                 request.open("GET", '?sat=' + s, false); // saturation is global
             }
             else if(sliderId==="hue")
             {
+                document.getElementById("hue-text").innerHTML = "Hue: " + h;
                 request.open("GET", '?hue=' + h, false); // hue is global
             }
             else
@@ -322,15 +329,15 @@ const String index_html = R"rawliteral(
         <h1 style="text-align: center;">Kitchen Lighting</h1>
         <div class="solidColorContainer">
             <div class="grid">
-                <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('72,61,137')"></button>
+                <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('85,76,254')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#92a1a1" onclick="setSwatch('72,61,85')"></button>
                 </div>
-                <div><button class="swatch" style="background-color:#c4e6e6" onclick="setSwatch('72,61,255')"></button>
+                <div><button class="swatch" style="background-color:#c4e6e6" onclick="setSwatch('72,61,254')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#9dfbfb" onclick="setSwatch('72,115,130')"></button>
                 </div>
-                <div><button class="swatch" style="background-color:#fbe1ac" onclick="setSwatch('29,179,255')"></button>
+                <div><button class="swatch" style="background-color:#fbe1ac" onclick="setSwatch('49,140,254')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#f9cd77" onclick="setSwatch('28,170,216')"></button>
                 </div>
@@ -339,44 +346,55 @@ const String index_html = R"rawliteral(
                 <div><button class="swatch" style="background-color:#c38509" onclick="setSwatch('29,244,88')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#a7cdffcc"
-                        onclick="setSwatch('164,4,255')"></button></div>
+                        onclick="setSwatch('107,67,255')"></button></div>
                 <div><button class="swatch" style="background-color:#a7cdffcc"
-                        onclick="setSwatch('164,4,176')"></button></div>
+                        onclick="setSwatch('107,67,176')"></button></div>
                 <div><button class="swatch" style="background-color:#73b0ffcc"
-                        onclick="setSwatch('164,4,100')"></button></div>
-                <div><button class="swatch" style="background-color:#245fadcc" onclick="setSwatch('164,4,98')"></button>
+                        onclick="setSwatch('107,67,100')"></button></div>
+                <div><button class="swatch" style="background-color:#245fadcc" onclick="setSwatch('150,200,98')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#8c03db" onclick="setSwatch('192,255,93')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#9b0000" onclick="setSwatch('0,255,93')"></button>
                 </div>
-                <div><button class="swatch" style="background-color:#ffd208" onclick="setSwatch('21,255,255')"></button>
+                <div><button class="swatch" style="background-color:#5bd0ff" onclick="setSwatch('136,255,255')"></button>
                 </div>
-                <div><button class="swatch" style="background-color:#1b17ff"
-                        onclick="setSwatch('167,255,166')"></button></div>
+                <div><button class="swatch" style="background-color:#1b17ff" onclick="setSwatch('167,255,166')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#00f064" onclick="setSwatch('81,255,255')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#009b27" onclick="setSwatch('81,255,168')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#00c89d" onclick="setSwatch('100,255,208')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#f0ff17" onclick="setSwatch('66,255,255')"></button>
+                </div>
             </div>
         </div>
         <br>
         <div class="hsvSlidecontainer">
-            <span class="unselectable">Hue</span> <input id="hue" type="range" oninput="setColor(this.id)" min="0"
-                max="255" value="0" class="hueSlider">
-            <span class="unselectable">Sat</span> <input id="sat" type="range" oninput="setColor(this.id)" min="0"
-                max="255" value="255" class="slider">
-            <span class="unselectable">Bri</span><input id="bri" type="range" onchange="setColor(this.id)" min="24"
-                max="255" value="150" class="slider">
+            <span class="unselectable" id="hue-text">Hue</span> <input id="hue" type="range" oninput="setColor(this.id)"
+                min="0" max="255" value="0" class="hueSlider">
+            <span class="unselectable" id="sat-text">Sat</span> <input id="sat" type="range" oninput="setColor(this.id)"
+                min="0" max="255" value="255" class="slider">
+            <span class="unselectable" id="bri-text">Bri</span><input id="bri" type="range" onchange="setColor(this.id)"
+                min="24" max="255" value="150" class="slider">
         </div>
-        <!-- <h2 style="text-align: center;">Animations</h2> -->
         <br>
         <div class="aniContainer">
             <div class="center"><button class="button" onclick="setAnimation('1')">Color Streams</button></div>
-            <div class="center"><button class="button" onclick="setAnimation('2')">Random Dots</button></div>
-            <div class="center"><button class="button" onclick="setAnimation('3')">Noise</button></div>
-            <div class="center"><button class="button" onclick="setAnimation('4')">Blue Jumper</button></div>
-            <div class="center"><button class="button" onclick="setAnimation('5')">Purple Jumper</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('10')">Color Waves</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('2')">Red Raindrops</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('13')">Twinkle Stars</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('12')">Inchworm</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('3')">Analog Noise</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('4')">Blue Ocean</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('5')">Purple Ocean</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('11')">Red Ocean</button></div>
             <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>
-            <div class="center"><button class="button" onclick="setAnimation('7')">Flash Color</button></div>
             <div class="center"><button class="button" onclick="setAnimation('8')">Left to Right</button></div>
             <div class="center"><button class="button" onclick="setAnimation('9')">Campfire</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('7')">Color Strobe</button></div>
             <div class="center"><button class="button" onclick="setAnimation('')">Off</button></div>
         </div>
         <br>
