@@ -12,7 +12,7 @@
              you're deploying firmware to a new device. It just
              creates extra deployment steps.
              
-  Kary Wall 2/3/2022.
+  Kary Wall 2/20/2022.
 ===================================================================+*/
 
 #include <Arduino.h>
@@ -31,7 +31,7 @@ const String index_html = R"rawliteral(
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED Man: Volta</title>
+    <title>LED Man: Kitchen</title>
     <script type=text/javascript>
         function makeHttpObject()  {
             try { return new XMLHttpRequest(); }
@@ -326,7 +326,7 @@ const String index_html = R"rawliteral(
 
 <body>
     <div>
-        <h1 style="text-align: center;">Ledman Volta</h1>
+        <h1 style="text-align: center;">Kitchen Lighting</h1>
         <div class="solidColorContainer">
             <div class="grid">
                 <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('85,76,254')"></button>

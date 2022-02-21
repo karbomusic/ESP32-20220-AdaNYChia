@@ -3,7 +3,7 @@
 
   Summary:   Simple FastLED pixel animation testing.
 
-  Kary Wall 2022.
+  Kary Wall 2/20/22.
 ===================================================================+*/
 //#define FASTLED_INTERRUPT_RETRY_COUNT 0 // required before #include
 //#define FASTLED_ALLOW_INTERRUPTS 0
@@ -14,7 +14,7 @@
 #define FRAMES_PER_SECOND 100
 #define COOLING 70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 120
+#define NUM_LEDS 281
 
 // Structure for remebering a pixel's color.
 struct sLED

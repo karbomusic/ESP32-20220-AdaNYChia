@@ -68,7 +68,7 @@
             OLED SCA = 21           : ESP builtin SCA/SCL pins, don't assign in code!
             FAN_PIN = 33            : PWM controlled heat fan pin.
 
-  Kary Wall 2/11/2022.
+  Kary Wall 2/20/2022.
 ===================================================================+*/
 
 #define FASTLED_INTERNAL // Quiets build noise
@@ -98,7 +98,7 @@
 7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
-#define USE_HARDWARE_INPUT 0 // Use installed hardware (knob, temp, buttons etc.
+#define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.
 const int RND_PIN = 34;
 const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
@@ -107,13 +107,13 @@ const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 2500; // mA
+const int MAX_CURRENT = 10000; // mA
 const int NUM_VOLTS = 5;
 
 // Heat management
 const int FAN_PIN = 33;
 const int FAN_CHANNEL = 0;
-const int FAN_FREQ = 5000;
+const int FAN_FREQ = 10000;
 const int FAN_RES = 8;
 const int FAN_SPEED = 220;
 const float MAX_HEAT = 130.0;  // F
@@ -161,8 +161,8 @@ int colorSelectPressed = 0;
 int currentButtonColor = 0;
 Mode previousMode = Mode::Off;
 CHSV previousColor = CHSV(0, 0, 0);
-CHSV buttonColors[] = {CHSV(85,76,254), CHSV(0, 0, 255), CHSV(28, 182, 225), CHSV(28, 182, 255),
-                       CHSV(164, 4, 255), CHSV(164, 4, 176), CHSV(85,61,254), CHSV(72, 61, 85), previousColor, CHSV(0, 0, 0)};
+CHSV buttonColors[] = {CHSV(85, 76, 254), CHSV(0, 0, 255), CHSV(28, 182, 225), CHSV(28, 182, 255),
+                       CHSV(164, 4, 255), CHSV(164, 4, 176), CHSV(85, 61, 254), CHSV(72, 61, 85), CHSV(0, 0, 0)};
 
 void setup()
 {
@@ -254,13 +254,19 @@ void loop()
                 display.println("Temp:" + String(objTemp) + " | " + String(ambTemp) + " F");
             }
             display.display();
-            EVERY_N_SECONDS(5) { displayInfoToggle = !displayInfoToggle; }
         }
         else
         {
             return;
         }
     }
+
+#ifdef USE_HARDWARE_INPUT
+    EVERY_N_SECONDS(5)
+    {
+        displayInfoToggle = !displayInfoToggle;
+    }
+#endif
 
     /*--------------------------------------------------------------------
      Project specific loop code
@@ -284,9 +290,9 @@ void loop()
             }
             g_ledMode = Mode::SolidColor;
             lastButtonUpdate = millis();
+           // colorSelectPressed = 0;
         }
 #endif
-
         switch (g_ledMode) // switch  mode based on user input
         {
         case Mode::Animation:
@@ -353,16 +359,16 @@ void loop()
             break;
 
         case Mode::SolidColor:
-            if (previousColor != g_chsvColor)
+             if (previousColor != g_chsvColor)
             {
-                previousMode = Mode::SolidColor;
-                g_currentAnimation = "Solid Color";
-                previousColor = g_chsvColor;
-                for (int i = 0; i < NUM_LEDS; i++)
-                {
-                    leds[i] = g_chsvColor;
-                }
-                FastLED.show();
+            previousMode = Mode::SolidColor;
+            g_currentAnimation = "Solid Color";
+            previousColor = g_chsvColor;
+            for (int i = 0; i < NUM_LEDS; i++)
+            {
+                leds[i] = g_chsvColor;
+            }
+            FastLED.show();
             }
             break;
 
