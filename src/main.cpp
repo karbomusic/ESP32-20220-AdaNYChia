@@ -45,6 +45,15 @@
                                  | () |
                        GND<-10k<-|____|->DATA
 
+             Bright Knob: Pin 1=GND, Pin 2=DATA, Pin 3=VCC
+
+                                    |
+                                  (___)
+                                  | | |
+                                  G D 3
+                                  N T V
+                                  D A 3
+                                    
   Building:  pio run -t <target> -e envName
 
              Examples:
@@ -262,6 +271,7 @@ void loop()
     }
 
 #ifdef USE_HARDWARE_INPUT
+    // Only toggle if the heat sensor is being used.
     EVERY_N_SECONDS(5)
     {
         displayInfoToggle = !displayInfoToggle;
@@ -290,7 +300,7 @@ void loop()
             }
             g_ledMode = Mode::SolidColor;
             lastButtonUpdate = millis();
-           // colorSelectPressed = 0;
+            // colorSelectPressed = 0;
         }
 #endif
         switch (g_ledMode) // switch  mode based on user input
@@ -359,16 +369,16 @@ void loop()
             break;
 
         case Mode::SolidColor:
-             if (previousColor != g_chsvColor)
+            if (previousColor != g_chsvColor)
             {
-            previousMode = Mode::SolidColor;
-            g_currentAnimation = "Solid Color";
-            previousColor = g_chsvColor;
-            for (int i = 0; i < NUM_LEDS; i++)
-            {
-                leds[i] = g_chsvColor;
-            }
-            FastLED.show();
+                previousMode = Mode::SolidColor;
+                g_currentAnimation = "Solid Color";
+                previousColor = g_chsvColor;
+                for (int i = 0; i < NUM_LEDS; i++)
+                {
+                    leds[i] = g_chsvColor;
+                }
+                FastLED.show();
             }
             break;
 
