@@ -14,7 +14,7 @@
 #define FRAMES_PER_SECOND 100
 #define COOLING 70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 281
+#define NUM_LEDS 39
 
 // Structure for remebering a pixel's color.
 struct sLED

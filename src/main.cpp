@@ -98,7 +98,7 @@
 7. NEW: Set NUM_LEDS in Kanimations.h
 -------------------------------------------------------------------*/
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
-#define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.
+#define USE_HARDWARE_INPUT 0 // Use installed hardware (knob, temp, buttons etc.
 const int RND_PIN = 34;
 const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
@@ -107,7 +107,7 @@ const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 10000; // mA
+const int MAX_CURRENT = 2000; // mA
 const int NUM_VOLTS = 5;
 
 // Heat management
