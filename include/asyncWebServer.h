@@ -132,9 +132,12 @@ void startWebServer()
                           g_currentAnimation = "Twinkle Stars";
                           g_animationValue = 13;
                           break;
-                      default:
-                          g_currentAnimation = "Lights Out";
-                          g_animationValue = 0;
+                      default:                          
+                         if(g_lightsOutOnPageLoad)
+                          {
+                            g_currentAnimation = "Lights Out";
+                            g_animationValue = 0;
+                          }
                           break;
                       }
                       Serial.println("Animation chosen: " + String(g_currentAnimation) + " (" + String(g_animationValue) + ")");

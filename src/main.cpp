@@ -105,6 +105,7 @@
 5. Set ssid and password in secrets.h
 6. Enable USE_HARDWARE_INPUT if using an analog brightness knob (GPIO35).
 7. NEW: Set NUM_LEDS in Kanimations.h
+8. Optional: g_lightsOutOnPageLoad = false to keep lights on after page load.
 -------------------------------------------------------------------*/
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
 #define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.
@@ -144,7 +145,7 @@ extern int g_lineHeight;
 // Project specific externs and globals
 extern int *getLtrTransform(int leds[], int rows, int cols);
 extern Mode g_ledMode = Mode::Off;
-extern uint8_t g_animationValue;
+extern int g_animationValue;
 extern uint8_t g_briteValue;
 extern CHSV g_chsvColor;
 
@@ -211,6 +212,8 @@ void setup()
     FastLED.setCorrection(Halogen);
     pinMode(RND_PIN, INPUT);
     randomSeed(analogRead(RND_PIN));
+    FastLED.clear();
+    FastLED.show();
 
     // Transpose pixels if needed. Set NUM_ROWS=1 for a single row strip.
     // When using an anmiation that cares about row order, pass gLeds[]
