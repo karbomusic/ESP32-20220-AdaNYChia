@@ -14,7 +14,7 @@
 #define FRAMES_PER_SECOND 100
 #define COOLING 70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 281
+
 
 // Structure for remebering a pixel's color.
 struct sLED
@@ -39,7 +39,6 @@ int gLeds[NUM_LEDS];
 int g_animationValue = -1;               // to inform loop which request was made (needs event).
 uint8_t g_briteValue = 255;              // used to inform loop of new brightness value.
 CHSV g_chsvColor(0, 0, 0);               // used to inform loop of new solid color.
-const bool g_lightsOutOnPageLoad = true; // if true, leds are turned off when web page refreshes.
 
 // prototypes
 int *getLtrTransform(int leds[], int rows, int cols);

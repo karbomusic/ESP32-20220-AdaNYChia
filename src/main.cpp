@@ -95,30 +95,8 @@
 // Heat sensor
 #define CALIBRATION_TEMP_MIN 0
 #define CALIBRATION_TEMP_MAX 1.9 // linear calaibration attempt because this one is off by 3-5 degrees F
-/*-------------------------------------------------------------------
-              [Pre-deloyment configuration]
 
-1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
-2. Set <title> in htmlStrings.h and <h1> header on line 302
-3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
-4. Set hostName in secrets.h
-5. Set ssid and password in secrets.h
-6. Enable USE_HARDWARE_INPUT if using an analog brightness knob (GPIO35).
-7. NEW: Set NUM_LEDS in Kanimations.h
-8. Optional: g_lightsOutOnPageLoad = false to keep lights on after page load.
--------------------------------------------------------------------*/
-#define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
-#define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.
-const int RND_PIN = 34;
-const int COLOR_SELECT_PIN = 16;
-const int BRITE_KNOB_PIN = 35;
-const int DATA_PIN = 5;
-const int TEMP_SCL_PIN = 22; // display and temperature sensors.
-const int TEMP_SDA_PIN = 21; // display and temperature sensors.
-const int NUM_ROWS = 1;
-const int NUM_COLS = 0;
-const int MAX_CURRENT = 10000; // mA
-const int NUM_VOLTS = 5;
+// Config is in appGlobals.h
 
 // Heat management
 const int FAN_PIN = 33;
