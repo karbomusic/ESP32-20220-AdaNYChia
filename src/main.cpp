@@ -365,6 +365,7 @@ void loop()
                 {
                     leds[i] = g_chsvColor;
                 }
+                g_briteValue = g_chsvColor.v;
                 FastLED.show();
             }
             break;
