@@ -282,6 +282,7 @@ void loop()
                 currentButtonColor = 0;
             }
             g_ledMode = Mode::SolidColor;
+            g_briteValue = g_chsvColor.v;
             lastButtonUpdate = millis();
             // colorSelectPressed = 0;
         }
