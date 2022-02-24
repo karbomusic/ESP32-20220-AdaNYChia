@@ -394,7 +394,7 @@ const String metaRedirect ="<html><head><meta http-equiv=\"refresh\"content=\"10
             <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>
             <div class="center"><button class="button" onclick="setAnimation('8')">Left to Right</button></div>
             <div class="center"><button class="button" onclick="setAnimation('9')">Campfire</button></div>
-            <!-- <div class="center"><button class="button" onclick="setAnimation('7')">Color Strobe</button></div> -->
+            <div class="center"><button class="button" onclick="setAnimation('7')">Color Strobe</button></div> 
             <div class="center"><button class="button" onclick="setAnimation('')">Off</button></div>
         </div>
         <br>
