@@ -131,7 +131,7 @@ extern CHSV g_chsvColor;
 String checkSPIFFS();
 void printDisplayMessage(String msg);
 uint8_t getBrigtnessLimit();
-void checkBriteKnob(bool isButtonPressed);
+void checkBriteKnob();
 float celsiusToFahrenheit(float c);
 
 // Locals
@@ -250,12 +250,12 @@ void loop()
         }
         else
         {
+            // If heatWarning is true, we've already set the display to HOT!
             return;
         }
     }
 
-#ifdef USE_HARDWARE_INPUT
-    // Only toggle if the heat sensor is being used.
+#ifdef USE_TEMPERATURE_SENSOR // Only toggle display if the heat sensor is being used.
     EVERY_N_SECONDS(5)
     {
         displayInfoToggle = !displayInfoToggle;
@@ -346,6 +346,7 @@ void loop()
                     leds[i] = g_chsvColor;
                 }
                 g_briteValue = g_chsvColor.v;
+                FastLED.setBrightness(g_chsvColor.v);
                 FastLED.show();
             }
             break;
@@ -373,12 +374,14 @@ void loop()
             currentButtonColor = 0;
         }
         g_ledMode = Mode::SolidColor;
+        previousMode = Mode::SolidColor;
         g_briteValue = g_chsvColor.v;
         lastButtonUpdate = millis();
+        FastLED.setBrightness(g_chsvColor.v);
         FastLED.show();
         return;
     }
-    checkBriteKnob(false);
+    checkBriteKnob();
 #endif
 
 #if USE_TEMPERATURE_SENSOR
@@ -460,24 +463,27 @@ void loop()
 ---------------------------------------------------------------------*/
 
 #if USE_HARDWARE_INPUT
-void checkBriteKnob(bool isButtonPressed)
+// Note: The reason there are so many smoothing tricks...
+// 3 analog reads averaged, cap on pot + EMS smoothing algo...
+// is because we are reading @ 3V3 volts, not the usual 5V.
+// Which puts the ADC closer to the noise floor.
+// Which in turn causes more jitter in the readings.
+void checkBriteKnob()
 {
+    // cheap jitter smooth #1
     int v1 = analogRead(BRITE_KNOB_PIN);
     int v2 = analogRead(BRITE_KNOB_PIN);
     int v3 = analogRead(BRITE_KNOB_PIN);
     int mVal = (v1 + v2 + v3) / 3;
 
-    EMA_S = (EMA_a * mVal) + ((1 - EMA_a) * EMA_S); // jitter reduction
+    EMA_S = (EMA_a * mVal) + ((1 - EMA_a) * EMA_S); // jitter smooth #2
     uint8_t mappedVal = map(EMA_S, 0, 4095, 0, 255);
-    if (mappedVal != g_briteValue && abs(mappedVal - g_briteValue) > 1)
+    if (mappedVal != lastKnobValue && abs(mappedVal - lastKnobValue) > 2)
     {
-        // g_ledMode = Mode::Bright;
-       // FastLED.setBrightness(mappedVal);
-       // FastLED.show();
+        Serial.println(String(millis()) + " BRIGHT | " + g_briteValue + " | MAP: " + mappedVal);
         g_briteValue = mappedVal;
         g_ledMode = Mode::Bright;
         lastKnobValue = mappedVal;
-        Serial.println(String(millis()) + " BAM |" + mappedVal);
     }
 }
 #endif
