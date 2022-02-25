@@ -131,7 +131,7 @@ extern CHSV g_chsvColor;
 String checkSPIFFS();
 void printDisplayMessage(String msg);
 uint8_t getBrigtnessLimit();
-void checkBriteKnob();
+void checkBriteKnob(bool isButtonPressed);
 float celsiusToFahrenheit(float c);
 
 // Locals
@@ -269,27 +269,7 @@ void loop()
     EVERY_N_MILLISECONDS(1)
     {
 
-// Use installed brite knob and color select button
-#if USE_HARDWARE_INPUT
-        
-        colorSelectPressed = digitalRead(COLOR_SELECT_PIN);
-        if (colorSelectPressed == 1 && (millis() - lastButtonUpdate > 300))
-        {
-            g_chsvColor = buttonColors[currentButtonColor];
-            currentButtonColor += 1;
-            if (currentButtonColor >= ARRAY_LENGTH(buttonColors))
-            {
-                currentButtonColor = 0;
-            }
-            g_ledMode = Mode::SolidColor;
-            g_briteValue = g_chsvColor.v;
-            lastButtonUpdate = millis();
-            // colorSelectPressed = 0;
-        }
-        else{
-            checkBriteKnob();
-        }
-#endif
+        // Use installed brite knob and color select button
         switch (g_ledMode) // switch  mode based on user input
         {
         case Mode::Animation:
@@ -382,6 +362,25 @@ void loop()
         }
     }
 
+#if USE_HARDWARE_INPUT
+    colorSelectPressed = digitalRead(COLOR_SELECT_PIN);
+    if (colorSelectPressed == 1 && (millis() - lastButtonUpdate > 300))
+    {
+        g_chsvColor = buttonColors[currentButtonColor];
+        currentButtonColor += 1;
+        if (currentButtonColor >= ARRAY_LENGTH(buttonColors))
+        {
+            currentButtonColor = 0;
+        }
+        g_ledMode = Mode::SolidColor;
+        g_briteValue = g_chsvColor.v;
+        lastButtonUpdate = millis();
+        FastLED.show();
+        return;
+    }
+    checkBriteKnob(false);
+#endif
+
 #if USE_TEMPERATURE_SENSOR
 
     EVERY_N_SECONDS(5)
@@ -461,7 +460,7 @@ void loop()
 ---------------------------------------------------------------------*/
 
 #if USE_HARDWARE_INPUT
-void checkBriteKnob()
+void checkBriteKnob(bool isButtonPressed)
 {
     int v1 = analogRead(BRITE_KNOB_PIN);
     int v2 = analogRead(BRITE_KNOB_PIN);
@@ -472,11 +471,14 @@ void checkBriteKnob()
     uint8_t mappedVal = map(EMA_S, 0, 4095, 0, 255);
     if (mappedVal != g_briteValue && abs(mappedVal - g_briteValue) > 1)
     {
-        g_ledMode = Mode::Bright;
+        // g_ledMode = Mode::Bright;
+       // FastLED.setBrightness(mappedVal);
+       // FastLED.show();
         g_briteValue = mappedVal;
+        g_ledMode = Mode::Bright;
         lastKnobValue = mappedVal;
         Serial.println(String(millis()) + " BAM |" + mappedVal);
-    }   
+    }
 }
 #endif
 
