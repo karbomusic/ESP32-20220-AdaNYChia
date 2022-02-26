@@ -132,9 +132,9 @@ void startWebServer()
                           g_currentAnimation = "Twinkle Stars";
                           g_animationValue = 13;
                           break;
-                      default:
-                          g_currentAnimation = "Lights Out";
-                          g_animationValue = 0;
+                      default:                          
+                            g_currentAnimation = "Lights Out";
+                            g_animationValue = 0;
                           break;
                       }
                       Serial.println("Animation chosen: " + String(g_currentAnimation) + " (" + String(g_animationValue) + ")");
@@ -182,11 +182,13 @@ void startWebServer()
                   else
                   {
                       g_ledMode = Mode::Off;
-                      g_animationValue = 0; // lights out
+                      g_animationValue = 0; 
                       g_currentAnimation = "Lights Out";
-                      //request->send_P(200, "text/html", index_html, processor);
-                      //request->send_P(200, "text/html", index_html);
-                       request->send(200, "text/html", index_html) ;
+                    //request->send_P(200, "text/html", index_html, processor);
+                    //request->send_P(200, "text/html", index_html);
+                     index_html.replace("{TITLE}", g_pageTitle);
+                     index_html.replace("{HEADING}", g_friendlyName);
+                     request->send(200, "text/html", index_html) ;
                   } });
 
     server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request)

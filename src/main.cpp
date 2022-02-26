@@ -53,7 +53,7 @@
                                   G D 3
                                   N T V
                                   D A 3
-                                    
+
   Building:  pio run -t <target> -e envName
 
              Examples:
@@ -81,7 +81,7 @@
 ===================================================================+*/
 
 #define FASTLED_INTERNAL // Quiets build noise
-#include <appGlobals.h>
+#include <globalConfig.h>
 #include <Arduino.h>
 #include "SPIFFS.h"
 #include <zUtils.h>
@@ -95,29 +95,8 @@
 // Heat sensor
 #define CALIBRATION_TEMP_MIN 0
 #define CALIBRATION_TEMP_MAX 1.9 // linear calaibration attempt because this one is off by 3-5 degrees F
-/*-------------------------------------------------------------------
-              [Pre-deloyment configuration]
 
-1. Set DATA_PIN, NUM_ROWS and NUM_COLS - ROWS=1 = single strip.
-2. Set <title> in htmlStrings.h and <h1> header on line 302
-3. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
-4. Set hostName in secrets.h
-5. Set ssid and password in secrets.h
-6. Enable USE_HARDWARE_INPUT if using an analog brightness knob (GPIO35).
-7. NEW: Set NUM_LEDS in Kanimations.h
--------------------------------------------------------------------*/
-#define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
-#define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.
-const int RND_PIN = 34;
-const int COLOR_SELECT_PIN = 16;
-const int BRITE_KNOB_PIN = 35;
-const int DATA_PIN = 5;
-const int TEMP_SCL_PIN = 22; // display and temperature sensors.
-const int TEMP_SDA_PIN = 21; // display and temperature sensors.
-const int NUM_ROWS = 1;
-const int NUM_COLS = 0;
-const int MAX_CURRENT = 10000; // mA
-const int NUM_VOLTS = 5;
+// Config is in appGlobals.h
 
 // Heat management
 const int FAN_PIN = 33;
@@ -144,7 +123,7 @@ extern int g_lineHeight;
 // Project specific externs and globals
 extern int *getLtrTransform(int leds[], int rows, int cols);
 extern Mode g_ledMode = Mode::Off;
-extern uint8_t g_animationValue;
+extern int g_animationValue;
 extern uint8_t g_briteValue;
 extern CHSV g_chsvColor;
 
@@ -166,6 +145,8 @@ bool heatWarning = false;
 const int activityLED = 12;
 unsigned long lastButtonUpdate = 0;
 int lastKnobValue = 0;
+float EMA_a = 0.8; // Smoothing
+int EMA_S = 0;     // Smoothing
 int colorSelectPressed = 0;
 int currentButtonColor = 0;
 Mode previousMode = Mode::Off;
@@ -211,7 +192,10 @@ void setup()
     FastLED.setCorrection(Halogen);
     pinMode(RND_PIN, INPUT);
     randomSeed(analogRead(RND_PIN));
+    FastLED.clear();
+    FastLED.show();
 
+    EMA_S = analogRead(BRITE_KNOB_PIN);
     // Transpose pixels if needed. Set NUM_ROWS=1 for a single row strip.
     // When using an anmiation that cares about row order, pass gLeds[]
     // and leds[] to your animation.
@@ -266,12 +250,12 @@ void loop()
         }
         else
         {
+            // If heatWarning is true, we've already set the display to HOT!
             return;
         }
     }
 
-#ifdef USE_HARDWARE_INPUT
-    // Only toggle if the heat sensor is being used.
+#ifdef USE_TEMPERATURE_SENSOR // Only toggle display if the heat sensor is being used.
     EVERY_N_SECONDS(5)
     {
         displayInfoToggle = !displayInfoToggle;
@@ -284,25 +268,7 @@ void loop()
 
     EVERY_N_MILLISECONDS(1)
     {
-
-// Use installed brite knob and color select button
-#if USE_HARDWARE_INPUT
-        checkBriteKnob();
-        colorSelectPressed = digitalRead(COLOR_SELECT_PIN);
-        if (colorSelectPressed == 1 && (millis() - lastButtonUpdate > 300))
-        {
-            g_chsvColor = buttonColors[currentButtonColor];
-            g_briteValue = buttonColors[currentButtonColor].v;
-            currentButtonColor += 1;
-            if (currentButtonColor >= ARRAY_LENGTH(buttonColors))
-            {
-                currentButtonColor = 0;
-            }
-            g_ledMode = Mode::SolidColor;
-            lastButtonUpdate = millis();
-            // colorSelectPressed = 0;
-        }
-#endif
+        // Use installed brite knob and color select button
         switch (g_ledMode) // switch  mode based on user input
         {
         case Mode::Animation:
@@ -378,6 +344,8 @@ void loop()
                 {
                     leds[i] = g_chsvColor;
                 }
+                g_briteValue = g_chsvColor.v;
+                FastLED.setBrightness(g_chsvColor.v);
                 FastLED.show();
             }
             break;
@@ -385,7 +353,6 @@ void loop()
         case Mode::Bright:
             FastLED.setBrightness(g_briteValue);
             FastLED.show();
-            g_chsvColor.v = g_briteValue;
             g_ledMode = previousMode;
             break;
 
@@ -396,6 +363,27 @@ void loop()
     }
 
 #if USE_HARDWARE_INPUT
+    colorSelectPressed = digitalRead(COLOR_SELECT_PIN);
+    if (colorSelectPressed == 1 && (millis() - lastButtonUpdate > 300))
+    {
+        g_chsvColor = buttonColors[currentButtonColor];
+        currentButtonColor += 1;
+        if (currentButtonColor >= ARRAY_LENGTH(buttonColors))
+        {
+            currentButtonColor = 0;
+        }
+        g_ledMode = Mode::SolidColor;
+        previousMode = Mode::SolidColor;
+        g_briteValue = g_chsvColor.v;
+        lastButtonUpdate = millis();
+        FastLED.setBrightness(g_chsvColor.v);
+        FastLED.show();
+        return;
+    }
+    checkBriteKnob();
+#endif
+
+#if USE_TEMPERATURE_SENSOR
 
     EVERY_N_SECONDS(5)
     {
@@ -472,34 +460,32 @@ void loop()
 /*--------------------------------------------------------------------
      Project specific utility code (otherwise use zUtils.h)
 ---------------------------------------------------------------------*/
+
 #if USE_HARDWARE_INPUT
+// Note: The reason there are so many smoothing tricks...
+// 3 analog reads averaged, cap on pot + EMS smoothing algo...
+// is because we are reading @ 3V3 volts, not the usual 5V.
+// Which puts the ADC closer to the noise floor.
+// Which in turn causes more jitter in the readings.
 void checkBriteKnob()
 {
-    int mVal = map(analogRead(BRITE_KNOB_PIN), 0, 4095, 0, 255);
-    if (mVal != lastKnobValue)
+    // cheap jitter smooth #1
+    int v1 = analogRead(BRITE_KNOB_PIN);
+    int v2 = analogRead(BRITE_KNOB_PIN);
+    int v3 = analogRead(BRITE_KNOB_PIN);
+    int mVal = (v1 + v2 + v3) / 3;
+
+    EMA_S = (EMA_a * mVal) + ((1 - EMA_a) * EMA_S); // jitter smooth #2
+    uint8_t mappedVal = map(EMA_S, 0, 4095, 0, 255);
+    if (mappedVal != lastKnobValue && abs(mappedVal - lastKnobValue) > 2)
     {
-        if (abs(mVal - lastKnobValue) > 2) // faked smoothing (includes .1 UF cap on knob)
-        {
-            g_ledMode = Mode::Bright;
-            g_briteValue = mVal;
-            lastKnobValue = mVal;
-        }
+        Serial.println(String(millis()) + " BRIGHT | " + g_briteValue + " | MAP: " + mappedVal);
+        g_briteValue = mappedVal;
+        g_ledMode = Mode::Bright;
+        lastKnobValue = mappedVal;
     }
 }
 #endif
-
-// FastLED.showColor which I really need doesn't trigger the current bright
-// limter code. This is a workaround to calculate it for solid colors so
-// we can limit max brightness in the SolidColor mode.
-
-// NOTE 2/12/22: not currently used because FastLED.showColor() flickers terribly when changing brightness.
-// All this did was save me from the for loop to address all LEDs anyway.
-// But doing the loop myself seems just as fast and no flicker so bailing on this idea.
-uint8_t getBrigtnessLimit()
-{
-    return calculate_max_brightness_for_power_mW(leds, NUM_LEDS,
-                                                 g_chsvColor.v, calculate_unscaled_power_mW(leds, NUM_LEDS));
-}
 
 String checkSPIFFS()
 {

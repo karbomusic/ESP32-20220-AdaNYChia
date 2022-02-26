@@ -23,7 +23,7 @@ const String metaRedirect ="<html><head><meta http-equiv=\"refresh\"content=\"10
 
 // LED Web control panel
 //const char index_html[] PROGMEM = R"rawliteral(
-const String index_html = R"rawliteral(
+ String index_html = R"rawliteral(
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,7 +31,7 @@ const String index_html = R"rawliteral(
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED Man: Kitchen</title>
+    <title>{TITLE}</title>
     <script type=text/javascript>
         function makeHttpObject()  {
             try { return new XMLHttpRequest(); }
@@ -326,16 +326,16 @@ const String index_html = R"rawliteral(
 
 <body>
     <div>
-        <h1 style="text-align: center;">Kitchen Lighting</h1>
+        <h1 style="text-align: center;">{HEADING}</h1>
         <div class="solidColorContainer">
             <div class="grid">
                 <div><button class="swatch" style="background-color:#f2feff" onclick="setSwatch('85,76,254')"></button>
                 </div>
-                <div><button class="swatch" style="background-color:#92a1a1" onclick="setSwatch('72,61,85')"></button>
-                </div>
                 <div><button class="swatch" style="background-color:#c4e6e6" onclick="setSwatch('72,61,254')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#9dfbfb" onclick="setSwatch('72,115,130')"></button>
+                </div>
+                <div><button class="swatch" style="background-color:#92a1a1" onclick="setSwatch('72,61,85')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#fbe1ac" onclick="setSwatch('49,140,254')"></button>
                 </div>
@@ -355,7 +355,7 @@ const String index_html = R"rawliteral(
                 </div>
                 <div><button class="swatch" style="background-color:#8c03db" onclick="setSwatch('192,255,93')"></button>
                 </div>
-                <div><button class="swatch" style="background-color:#9b0000" onclick="setSwatch('0,255,93')"></button>
+                <div><button class="swatch" style="background-color:#9b0000" onclick="setSwatch('0,255,120')"></button>
                 </div>
                 <div><button class="swatch" style="background-color:#5bd0ff" onclick="setSwatch('136,255,255')"></button>
                 </div>
@@ -394,7 +394,7 @@ const String index_html = R"rawliteral(
             <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>
             <div class="center"><button class="button" onclick="setAnimation('8')">Left to Right</button></div>
             <div class="center"><button class="button" onclick="setAnimation('9')">Campfire</button></div>
-            <div class="center"><button class="button" onclick="setAnimation('7')">Color Strobe</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('7')">Color Strobe</button></div> 
             <div class="center"><button class="button" onclick="setAnimation('')">Off</button></div>
         </div>
         <br>

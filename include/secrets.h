@@ -1,11 +1,9 @@
 /*+===================================================================
   File:      secrets.h
 
-  Summary:   Device and WiFi specfic details go here such as
-             SSID, password and hostname. Also some are used
-             for OTA updates and the about page.
+  Summary:   Wifi SSID and Credentials.
 
-  Kary Wall 2/20/2022.
+  Kary Wall 2/26/2022.
 ===================================================================+*/
 
 #include <Arduino.h>
@@ -17,8 +15,3 @@
 
 String ssid = STASSID;                         // WiFi ssid
 String password = STAPSK;                      // WiFi password
-String hostName = "ledman-kitchen";            // hostname as seen on network
-String softwareVersion = "2.20.22";            // used for about page
-String deviceFamily = "ESP32-ELOTA-Matrix";    // used for about page
-String description = "I'm a led matrix baby."; // used for about page
-String globalIP = "";

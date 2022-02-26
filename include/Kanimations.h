@@ -14,7 +14,7 @@
 #define FRAMES_PER_SECOND 100
 #define COOLING 70 // default: 55
 #define SPARKING 120
-#define NUM_LEDS 281
+
 
 // Structure for remebering a pixel's color.
 struct sLED
@@ -36,9 +36,9 @@ enum Mode
 // globals
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
-uint8_t g_animationValue = 0; // to inform loop which request was made (needs event).
-uint8_t g_briteValue = 255;   // used to inform loop of new brightness value.
-CHSV g_chsvColor(0, 0, 0);    // used to inform loop of new solid color.
+int g_animationValue = -1;               // to inform loop which request was made (needs event).
+uint8_t g_briteValue = 255;              // used to inform loop of new brightness value.
+CHSV g_chsvColor(0, 0, 0);               // used to inform loop of new solid color.
 
 // prototypes
 int *getLtrTransform(int leds[], int rows, int cols);
@@ -492,7 +492,6 @@ void beatwave()
     {
         leds[i] = ColorFromPalette(currentPalette, i + wave1 + wave2 + wave3 + wave4, 255, currentBlending);
     }
-
 }
 
 void inoise8_mover()
@@ -500,5 +499,5 @@ void inoise8_mover()
     uint8_t locn = inoise8(xscale, dist + yscale) % 255;                       // Get a new pixel location from moving noise.
     uint8_t pixlen = map(locn, 0, 255, 0, NUM_LEDS);                           // Map that to the length of the strand.
     leds[pixlen] = ColorFromPalette(currentPalette, pixlen, 255, LINEARBLEND); // Use that value for both the location as well as the palette index colour for the pixel.
-    dist += beatsin8(10, 1, 4); // Moving along the distance (that random number we started out with). Vary it a bit with a sine wave.
+    dist += beatsin8(10, 1, 4);                                                // Moving along the distance (that random number we started out with). Vary it a bit with a sine wave.
 }
