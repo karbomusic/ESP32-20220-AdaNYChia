@@ -195,7 +195,9 @@ void setup()
     FastLED.clear();
     FastLED.show();
 
+    // pot smoothing
     EMA_S = analogRead(BRITE_KNOB_PIN);
+
     // Transpose pixels if needed. Set NUM_ROWS=1 for a single row strip.
     // When using an anmiation that cares about row order, pass gLeds[]
     // and leds[] to your animation.
