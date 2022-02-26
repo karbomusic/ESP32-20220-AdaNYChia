@@ -81,7 +81,7 @@
 ===================================================================+*/
 
 #define FASTLED_INTERNAL // Quiets build noise
-#include <appGlobals.h>
+#include <globalConfig.h>
 #include <Arduino.h>
 #include "SPIFFS.h"
 #include <zUtils.h>
@@ -268,7 +268,6 @@ void loop()
 
     EVERY_N_MILLISECONDS(1)
     {
-
         // Use installed brite knob and color select button
         switch (g_ledMode) // switch  mode based on user input
         {
