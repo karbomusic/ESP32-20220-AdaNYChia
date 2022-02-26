@@ -18,7 +18,7 @@
 ===================================================================+*/
 
 #define USE_HARDWARE_INPUT 1 // Use installed hardware (knob, temp, buttons etc.)
-#define USE_TEMPERATURE_SENSOR 1 // Use temperature sensor
+#define USE_TEMPERATURE_SENSOR 0 // Use temperature sensor
 const int RND_PIN = 34;
 const int COLOR_SELECT_PIN = 16;
 const int BRITE_KNOB_PIN = 35;
@@ -31,11 +31,11 @@ const int MAX_CURRENT = 9000; // mA
 const int NUM_VOLTS = 5;
 
 // was in kanimations.h
-#define NUM_LEDS 281
+#define NUM_LEDS 24
 
 // was in secrets.h
-String hostName = "ledman-kitchen";            // hostname as seen on network and home page
-String friendlyName = "Kitchen";        // friendly name for home page
+String hostName = "ledman-circle";            // hostname as seen on network and home page
+String friendlyName = "Circle";        // friendly name for home page
 String softwareVersion = "2.26.24";            // used for about page
 String deviceFamily = "ESP32-ELOTA-Matrix";    // used for about page
 String description = "LEDs baby!"; // used for about page

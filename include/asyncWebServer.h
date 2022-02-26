@@ -72,7 +72,7 @@ void startWebServer()
                   {
                       g_ledMode = Mode::Animation;
                       animationVal = request->getParam(ANIMATION_PARAM)->value();
-                      uint8_t intVal = atoi(animationVal.c_str());
+                      int intVal = atoi(animationVal.c_str());
 
                       switch (intVal)
                       {
@@ -132,8 +132,12 @@ void startWebServer()
                           g_currentAnimation = "Twinkle Stars";
                           g_animationValue = 13;
                           break;
+                       case -1:
+                          g_currentAnimation = "Lights Out";
+                          g_animationValue = -1;
+                          break;
                       default:                          
-                            g_currentAnimation = "Lights Out";
+                            g_currentAnimation = "Ready...";
                             g_animationValue = 0;
                           break;
                       }
@@ -181,9 +185,9 @@ void startWebServer()
                   }
                   else
                   {
-                      g_ledMode = Mode::Off;
-                      g_animationValue = 0; 
-                      g_currentAnimation = "Lights Out";
+                    //   g_ledMode = Mode::Off;
+                    //   g_animationValue = 0; 
+                      g_currentAnimation = "Ready";
                     //request->send_P(200, "text/html", index_html, processor);
                     //request->send_P(200, "text/html", index_html);
                      index_html.replace("{TITLE}", g_pageTitle);

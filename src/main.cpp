@@ -73,7 +73,7 @@
             COLOR_SELECT_PIN = 16   : Color selection button.
             HEAT_SCL_PIN = 22       : I2C SCL pin for temperature sensor.
             HEAT_SDA_PIN = 21       : I2C SDA pin for temperature sensor.
-            OLED SCL = 22           : OLED pins for the LED strip.
+            OLED SCL = 22           : ESP builtin SCA/SCL pins, don't assign in code!
             OLED SCA = 21           : ESP builtin SCA/SCL pins, don't assign in code!
             FAN_PIN = 33            : PWM controlled heat fan pin.
 
@@ -275,8 +275,12 @@ void loop()
             previousMode = Mode::Animation;
             switch (g_animationValue)
             {
-            case 0:
+            case -1:
                 clearLeds();
+                break;
+
+            case 0:
+                // do nothing page loaded
                 break;
 
             case 1:
@@ -353,6 +357,7 @@ void loop()
         case Mode::Bright:
             FastLED.setBrightness(g_briteValue);
             FastLED.show();
+            g_chsvColor.v = g_briteValue;
             g_ledMode = previousMode;
             break;
 
@@ -479,7 +484,6 @@ void checkBriteKnob()
     uint8_t mappedVal = map(EMA_S, 0, 4095, 0, 255);
     if (mappedVal != lastKnobValue && abs(mappedVal - lastKnobValue) > 2)
     {
-        Serial.println(String(millis()) + " BRIGHT | " + g_briteValue + " | MAP: " + mappedVal);
         g_briteValue = mappedVal;
         g_ledMode = Mode::Bright;
         lastKnobValue = mappedVal;

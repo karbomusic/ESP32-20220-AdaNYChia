@@ -347,11 +347,11 @@
         </div>
         <br>
         <div class="hsvSlidecontainer">
-            <span class="unselectable" id="hue-text">Hue</span> <input id="hue" type="range" oninput="setColor(this.id)"
+            <span class="unselectable" id="hue-text">Hue</span> <input id="hue" type="range" onmouseup="setColor(this.id)"
                 min="0" max="255" value="0" class="hueSlider">
-            <span class="unselectable" id="sat-text">Sat</span> <input id="sat" type="range" oninput="setColor(this.id)"
+            <span class="unselectable" id="sat-text">Sat</span> <input id="sat" type="range" onmouseup="setColor(this.id)"
                 min="0" max="255" value="255" class="slider">
-            <span class="unselectable" id="bri-text">Bri</span><input id="bri" type="range" onchange="setColor(this.id)"
+            <span class="unselectable" id="bri-text">Bri</span><input id="bri" type="range" onmouseup="setColor(this.id)"
                 min="24" max="255" value="150" class="slider">
         </div>
         <br>
@@ -368,8 +368,8 @@
             <div class="center"><button class="button" onclick="setAnimation('6')">Scroll Color</button></div>
             <div class="center"><button class="button" onclick="setAnimation('8')">Left to Right</button></div>
             <div class="center"><button class="button" onclick="setAnimation('9')">Campfire</button></div>
-            <!-- <div class="center"><button class="button" onclick="setAnimation('7')">Color Strobe</button></div> -->
-            <div class="center"><button class="button" onclick="setAnimation('')">Off</button></div>
+            <div class="center"><button class="button" onclick="setAnimation('7')">Color Strobe</button></div> 
+            <div class="center"><button class="button" onclick="setAnimation('-1')">Off</button></div>
         </div>
         <br>
     </div>
