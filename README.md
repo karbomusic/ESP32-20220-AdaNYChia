@@ -33,13 +33,14 @@ Set NUM_ROWS=1 for LED Strips.
   **Config**    
   You must update secrets.h with your WiFi credentials and the hostname you choose for this device. Currently using Elegant OTA.
 
-             Pre-deloyment configuration checklist:
+             Pre-deloyment configuration checklist (globalConfig.h):
              
-                1. Set NUM_LEDS, NUM_ROWS and NUM_COLS - NUM_ROWS=1 = single strip.
-                2. Set <title> in htmlStrings.h
-                3. Set power max in main.cpp below (must match PSU used!).
-                4. Set hostName in secrets.h
-                5. Set ssid and password in secrets.h
+                1. Set DATA_PIN, NUM_ROWS and NUM_COLS -> Set ROWS=1 for single strip.
+                2. Set MAX_CURRENT in milliamps and NUM_VOLTS (must match PSU used!).
+                3. Set hostName and friendly name. 
+                4. Set ssid and password in secrets.h.
+                5. Enable USE_HARDWARE_INPUT if using an analog brightness knob (GPIO35).
+                6. Set NUM_LEDS to the number of LEDs in the strip/matrix.
 
   **Building**  
   pio run -t \<target> -e envName
