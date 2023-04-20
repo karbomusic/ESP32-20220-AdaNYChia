@@ -373,11 +373,11 @@ const String metaRedirect ="<html><head><meta http-equiv=\"refresh\"content=\"10
         </div>
         <br>
         <div class="hsvSlidecontainer">
-            <span class="unselectable" id="hue-text">Hue</span> <input id="hue" type="range" onmouseup="setColor(this.id)"
+            <span class="unselectable" id="hue-text">Hue</span> <input id="hue" type="range" onmouseup="setColor(this.id)" ontouchend="setColor(this.id)" 
                 min="0" max="255" value="0" class="hueSlider">
-            <span class="unselectable" id="sat-text">Sat</span> <input id="sat" type="range" onmouseup="setColor(this.id)"
+            <span class="unselectable" id="sat-text">Sat</span> <input id="sat" type="range" onmouseup="setColor(this.id)" ontouchend="setColor(this.id)"  
                 min="0" max="255" value="255" class="slider">
-            <span class="unselectable" id="bri-text">Bri</span><input id="bri" type="range" onmouseup="setColor(this.id)"
+            <span class="unselectable" id="bri-text">Bri</span><input id="bri" type="range" onmouseup="setColor(this.id)" ontouchend="setColor(this.id)"
                 min="24" max="255" value="150" class="slider">
         </div>
         <br>

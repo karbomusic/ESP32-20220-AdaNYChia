@@ -27,17 +27,17 @@ const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 2000; // mA
+const int MAX_CURRENT = 44500; // mA
 const int NUM_VOLTS = 5;
 
 // was in kanimations.h
-#define NUM_LEDS 105
+#define NUM_LEDS 210
 
 // was in secrets.h
-String hostName = "ledman-studio-couch";    // hostname as seen on network and home page
-String friendlyName = "Studio Couch";       // friendly name for home page
-String softwareVersion = "2.26.24";         // used for about page
-String deviceFamily = "ESP32-ELOTA-Matrix"; // used for about page
+String hostName = "ledman-kitchen";    // hostname as seen on network and home page
+String friendlyName = "Kitchen Lights";       // friendly name for home page
+String softwareVersion = "4.17.23";         // used for about page
+String deviceFamily = "ESP32-ELOTA-Strip"; // used for about page
 String description = "LEDs baby!";          // used for about page
 String globalIP = "";
 
