@@ -132,6 +132,10 @@ void startWebServer()
                           g_currentAnimation = "Twinkle Stars";
                           g_animationValue = 13;
                           break;
+                      case 14:
+                          g_currentAnimation = "Stove Light";
+                          g_animationValue = 14;
+                          break;
                        case -1:
                           g_currentAnimation = "Lights Out";
                           g_animationValue = -1;

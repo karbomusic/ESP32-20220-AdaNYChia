@@ -336,6 +336,9 @@ void loop()
             case 13:
                 starTwinkle(leds);
                 break;
+            case 14:
+                stoveLight(leds);
+                break;
             }
 
             break;

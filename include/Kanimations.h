@@ -64,6 +64,21 @@ void clearLeds()
 /*--------------------------------------------------------------------
                          FASTLED ANIMATIONS
 ---------------------------------------------------------------------*/
+int leds_done = 0;
+
+/*    This method for kitchen stove only */
+void stoveLight(CRGB leds[])
+{
+        for (int i = 203; i < 248; i++)
+        {
+            leds[i] = CHSV(49, 140, 240);
+        }
+
+    delay(20);
+    FastLED.show();
+
+}
+
 void randomDots2(CRGB leds[])
 {
     currentLEDNum = random(NUM_LEDS - 1);
@@ -82,8 +97,6 @@ void randomDots2(CRGB leds[])
     fadeToBlackBy(leds, NUM_LEDS, 10);
 }
 
-int leds_done = 0;
-
 void randomDots(CRGB leds[])
 {
     EVERY_N_MILLIS(20)
@@ -101,15 +114,6 @@ void randomDots(CRGB leds[])
             leds[i] = CHSV(random(128, 255), 255, random(0, 70));
         }
         FastLED.show();
-        // reset?
-        // EVERY_N_MILLIS_I(duration, 500)
-        //  {
-        // This initally defaults to 20 seconds, but then will change the run
-        // period to a new random number of seconds from 10 and 30 seconds.
-        // You can name "timingObj" whatever you want.
-        // duration.setPeriod(random16(5, 10));
-        //  leds_done = 0;
-        //  }
 
         if (leds_done < NUM_LEDS)
         {

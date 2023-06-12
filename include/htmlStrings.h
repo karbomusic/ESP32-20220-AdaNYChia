@@ -382,6 +382,7 @@ const String metaRedirect ="<html><head><meta http-equiv=\"refresh\"content=\"10
         </div>
         <br>
         <div class="aniContainer">
+            <div class="center"><button class="button" onclick="setAnimation('14')">Stove Light</button></div>
             <div class="center"><button class="button" onclick="setAnimation('1')">Color Streams</button></div>
             <div class="center"><button class="button" onclick="setAnimation('10')">Color Waves</button></div>
             <div class="center"><button class="button" onclick="setAnimation('2')">Red Raindrops</button></div>

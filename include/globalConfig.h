@@ -27,11 +27,11 @@ const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 44500; // mA
+const int MAX_CURRENT = 4500; // mA
 const int NUM_VOLTS = 5;
 
 // was in kanimations.h
-#define NUM_LEDS 210
+#define NUM_LEDS 300
 
 // was in secrets.h
 String hostName = "ledman-kitchen";    // hostname as seen on network and home page
